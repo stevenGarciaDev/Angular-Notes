@@ -1,0 +1,651 @@
+Introduction 
+
+Property Binding 
+
+Attribute binding 
+
+Adding Bootstrap 
+
+class binding 
+
+style binding 
+
+event binding 
+
+event filtering 
+
+template variables 
+
+two-way binding 
+
+pipes 
+
+custom pipes 
+
+exercise - favorite component 
+
+solution - favorite component 
+
+exercise - TitleCase 
+
+Solution - Title Case 
+
+/* ------------------------------
+
+Introduction 
+
+Property Binding 
+
+    import { Component } from '@angular/core';
+
+    @Component({
+        selector: 'courses',
+        template: `
+            <h2>{{ title }}</h2>
+            <img src="{{ imageUrl }}" />
+        `
+    })
+    export class CoursesComponent {
+        title = "List of courses";
+        imageUrl = "http://lorempixel.com/400/200";
+    }
+
+    Interpolation is syntactical sugar. {{ }}
+
+    When compiled, it's translated into property binding. 
+
+    With property binding, we bind the property of a DOM element 
+    such as src 
+    to a field or property in our component. 
+
+    The syntax for property binding. 
+
+    Now using property bindings. 
+
+
+    // so this is what happens behind the scenes 
+    // And when the inner field changes, the src attribute 
+    // will be automatically updated.
+    <img [src]="imageUrl" />
+
+
+    String Interpolation or [] binding syntax. 
+
+    Interpolation works well for adding dynamic values in headings.
+    // div, span, p, or basically text 
+
+    
+        <h2>{{ title }}</h2>
+
+            (compared to)
+
+        <h2 [textContent]="title"></h2>
+
+    In other cases, property binding syntax is actually shorter. 
+    // and a bit cleaner 
+
+
+    One thing to know about property binding is that it works only 
+    one way. 
+
+    From component to the DOM. 
+
+    Any changes in the DOM are not reflected in the Component's state. 
+
+
+Attribute binding 
+
+    import { Component } from '@angular/core';
+
+    @Component({
+        selector: 'courses',
+        template: `
+            <img [src]="imageUrl" />
+            <table>
+                <tr>
+                    <td [colspan]="colSpan"></td>
+                </tr>
+            </table>
+        `
+    })
+    export class CoursesComponent {
+        imageUrl = "http://lorempixel.com/400/200";
+        colSpan = 2;
+    }
+
+
+    Can't bind to 'colspan' since it isn't a known property of td. 
+
+
+    Need to understand the difference between DOM and HTML.
+
+    DOM is a model of objects that represent the structure of a document.
+
+        It's essentially a tree of objects in memory. 
+
+    HTML is a markup language for representing DOM in text. 
+
+    So when browser parses an HTML document, it creates a tree of objects in memory. (the DOM)
+
+
+    Could also create the tree of objects programmatically using Vanilla JavaScript.
+
+    HTML is far simpler. 
+
+    Key thing. 
+
+    Most of the attributes of HTML elements have a one to one mapping to properties 
+    in DOM objects. 
+
+    There are however a few exceptions 
+    HTML attributes that don't have a representation in the DOM 
+    such as colSpan. 
+
+
+    That DOM object doesn't have a property for that set attrbute. 
+
+    Also we have properties in DOM that do not have a representation in HTML 
+
+    such as [textContent] 
+    for a DOM object that doesn't exist as an attribute in HTML. 
+
+    So when using property binding, you should remember that you are actually 
+    binding to a DOM object and not an attribute of an HTML element.l 
+
+    99% of the time, it has a one to one mapping. 
+    But a few exceptions. 
+
+    To bind. 
+
+    Need a slightly different syntax. 
+
+    Prefix with attr for attribute and then . 
+    This way you are telling Angular, that you are targeting the attribute of 
+    an HTML element. 
+
+
+        <td [attr.colspan]="colSpan"></td>
+
+
+Adding Bootstrap 
+
+    How to add a library to our application?
+
+    A CSS library to make your website easily responsive through the use of 
+    CSS classes with default styling and responsiveness. 
+
+    $ npm install bootstrap --save 
+
+    // Store into node modules, --save adds it as a dependnency in package.json 
+
+    ^3.3.7
+
+        major.minor.patch 
+
+        ^
+        Means that we can use the most recent major version.
+        // but not up to 4.0.0
+
+    package.json is a config file that basically helps anyone with the project to install 
+    dependencies and easily share it so that the project size is smaller and easier to 
+    collaborate and download.
+
+   --
+
+    in
+    styles.css 
+
+        // Global styles 
+
+    // use a css import 
+
+    @import "~bootstrap/dist/css/bootstrap.css";
+
+    body { padding: 20px }
+
+    --
+
+    in courses.component.ts 
+
+    template: `
+        <button class="btn btn-primary">Save</button>
+    `
+
+class binding 
+
+    There are times when you may want to add additional classes to an element, 
+    based on some condition. 
+
+    Use a variation of property binding for that. 
+
+        [class.NameOfClassToAdd] = "fieldToBind"
+
+
+    import { Component } from '@angular/core';
+
+    @Component({
+        selector: 'courses',
+        template: `
+          <button class="btn btn-primary" [class.active]="isActive">Save</button>
+        `
+    })
+    export class CoursesComponent {
+        isActive = true;
+    }
+
+style binding 
+
+    A variation of property binding and similar to class binding. 
+
+    Basically this applies some inline styles based on some condition. 
+
+    // style binding 
+    <button [style.backgroundColor]="isActive ? 'blue' : white'"
+
+    // For a complete list of the style object 
+    Google: DOM style object properties 
+
+event binding 
+
+    Also have event binding to handle events raised from the DOM. 
+
+    // clicks, mouse movements, keystrokes, etc. 
+    // we bind it to a method in our component 
+
+    <button (click)="onSave()">Save</button>
+    
+    
+        onSave() {
+            console.log("Button was clicked");
+        }
+
+    Sometimes need access to the event object that was raised in the event handler
+
+    For example, mousemovements giving us the x and y position, must add it as a parameter. 
+
+
+        // so the $event object is known to Angular 
+
+    <button (click)="onSave($event)">Save</button>
+    
+
+        onSave($event) {
+            console.log("Button was clicked");
+        }
+
+    You can also create custom events in your application.
+
+    ---
+
+    All the DOM events bubble up the DOM tree unless a handler along the way 
+    prevents further bubbling. 
+
+
+    Event Bubbling 
+
+        If wrap with a div 
+
+        <div (click)="onDivClicked()">
+            <button (click)="onSave($event)">Save</button>
+        </div>
+
+
+        So now a click event will raise both the button and the div event handlers 
+        from the inside out. 
+
+    How to stop event bubbling?
+
+        onSave($event) {
+            // So this will stop the bubbling and the raising of event handlers.
+            $event.stopPropagation();
+            .....
+        }
+
+event filtering 
+
+    <input (keyup)="onKeyUp($event)" />
+
+        // Traditional implementation.
+        onKeyUp($event) {
+            // Perform some action if press enter. 
+            if ($event.keyCode === 13) console.log("ENTER was pressed");
+        }
+
+        // In Angular, we have a better way to implement the exact same feature. 
+
+        Can apply a filter when handling an event. 
+
+        ----
+
+    // Method only called if enter key was clicked 
+     <input (keyup.enter)="onKeyUp($event)" />
+
+        onKeyUp() {
+            console.log("ENTER was pressed");
+        }
+
+
+template variables 
+
+     <input (keyup.enter)="onKeyUp($event)" />
+
+
+        onKeyUp($event) {
+            console.log($event.target.value);
+        }
+
+    ---
+    Angular provides another way to do this, so we don't have to pass the event object around. 
+
+        So #email is the name of our variable which references the input field.
+
+    <input #email (keyup.enter)="onKeyUp(email.value)" />
+
+        onKeyUp(email) {
+            console.log(email);
+        }
+
+    --
+    In a lot of cases, you can use template variables to simplify your code. 
+
+
+two-way binding 
+
+    Passing the email parameter around, 
+    in OOP, we should not pass parameters around since the object 
+    should encapsulate some data and some behavior.
+
+    If an object has all the data it needs, no need to pass parameters around. 
+
+    Previous written code is procedural.
+
+    -
+    
+    // This is BETTER.
+    Components encapsulate the data, logic, and HTML markup.
+
+    So remember property binding, we can bind a property of a DOM object, 
+    to a field in our TypeScript component class. 
+
+        PROPERTY BINDING 
+
+            The direction is one way.
+
+            Component -> View 
+
+        View will be notified and updated. 
+        But not the other way.
+
+    We want it to work two way.
+
+        So field of the component can be modified
+        through the events performed on the view. 
+
+
+
+    @Component({
+        selector: 'courses',
+        template: `
+            <input [value]="email" 
+        `
+    })
+    export class CoursesComponent {
+        email;
+
+        onKeyUp() {
+            console.log(this.email);
+        }
+    }
+
+    --
+
+    In Angular we have a special syntax for implementing two-way binding.
+
+
+        Think of the syntax as banana in a box. 
+
+        ngModel is something that Angular adds to the DOM object. 
+
+        ngModel is a built in directive that is used to implement two way binding. 
+
+        So the data is encapsulated in a generic way. 
+
+
+        @Component({
+            selector: 'courses',
+            template: `
+                <input [value]="email" (keyup.enter)="email = $event.target.value; onKeyUp()" />
+                <input [(ngModel)]="email" (keyup.enter)="onKeyUp()" />
+            `
+        })
+        export class CoursesComponent {
+            email;
+
+            onKeyUp() {
+                console.log(this.email);
+            }
+        }
+
+    Get error: Can't bind to ngModel since it isn't a known property of 'input'
+
+    Angular framework consists of several different modules.
+    In every module, we have a bunch of building blocks that are highly related.
+
+    Components, directives, pipes, etc. 
+
+    Not every application needs all the modules as that increases the size of the project. 
+
+    ngModel is defined in forms 
+    and is not imported by default. 
+
+    So to use ngModel or use forms, you need to explicitly import that module. 
+
+    in app.module.ts 
+
+        BrowserModule brings in some features that every web app needs 
+
+
+    import { FormsModule } from '@angular/forms';
+
+    imports: [
+        BrowserModule,
+        FormsModule
+    ]
+
+pipes 
+
+    A building block in Angular.
+
+    We use pipes to format data. 
+
+    Built in pipes 
+
+        * Uppercase 
+        * Lowercase 
+        * Decimal 
+        * Currency 
+        * Percent 
+
+    We can also create custom pipes. 
+
+    With the | operator and then the name of the pipe. 
+    We could also chain multiple pipes.
+
+        course.title | uppercase | lowercase
+
+        So the pipe called, number maps to decimal pipe.
+        This will provide commas for every 3 digits as to make it more readable. 
+
+
+    Could also have control over the digits after the decimal point. 
+    Supply an argument.
+
+
+        course.rating | number:'1.2-2'
+        // arg is integer digits 
+        // then min and max digits after the decimal point 
+        // so here 2 is the min and max amount of digits after the decimal point
+
+
+    course.price | currency
+
+        Could also specify the currency with 
+
+            currency:'AUD'
+            // for Australian dollars
+
+            currency:'AUD':true 
+
+            // boolean for if to display the currency symbol
+
+            // 3rd arg 
+
+            currency:'AUD':true:'3.2-2'
+            // specify the format requirements
+
+
+    course.releaseDate | date:'shortDate'
+
+
+    @Component({
+        selector: 'courses',
+        template: `
+            {{ course.title | uppercase }} <br />
+            {{ course.students | number }} <br />
+            {{ course.rating | number:'1.2-2' }} <br />
+            {{ course.price | currency }} <br />
+            {{ course.releaseDate | date:'shortDate' }}
+        `
+    })
+    export class CoursesComponent {
+        course = {
+            title = "The Complete Angular Course",
+            rating: 4.9745,
+            students: 30123,
+            price: 190.95,
+            releaseDate: new Date(2020, 3, 1)
+        }
+    }
+
+    Angular.io 
+
+        Search for 
+
+        datepipe 
+
+        To see 
+
+        it's defined in @angular/common 
+        in the CommonModule 
+
+    When you import the BrowserModule it also brings in the CommonModule.
+
+    CommonModule has a bunch of artifacts that are useful and often required for your app.
+
+
+    In AngularJS (1.x)
+        Had two pipes for filtering and sorting data. 
+
+        * orderBy 
+        * filter 
+
+        Don't have it in Angular.
+
+
+custom pipes 
+
+    So really long text. 
+
+    import { Component } from '@angular/core';
+
+    @Component({
+        selector: 'courses',
+        template: `
+            {{ text }}
+        `
+    })
+    export class CoursesComponent {
+        text = `
+            MJLASKFJEALFJEA;ILFJEALIFJAE
+        `
+    }
+
+    We want to summarize the text and use an ellipsis.
+
+    Goal is to do 
+
+        {{ text | summary }}
+
+        And to supply arguments 
+
+        {{ text | summary:10 }}
+
+    So new file in app/
+
+        summary.pipe.ts 
+
+    Can search up PipeTransform on angular.io 
+
+    // So Pipe is a decorator 
+    // PipeTransform is an interface that defines the shape 
+    // of all pipes in Angular.
+    import { Pipe, PipeTransform } from '@angular/core';
+
+    @Pipe({
+        name: 'summary'
+    })
+    export class SummaryPipe implements PipeTransform {
+        transform(value: string, arg?: any) {
+            if (!value)
+                return null;
+
+            return value.substr(0, 50) + '...';
+        }
+    }
+
+    Then need to register your custom pipe in a module. 
+
+    declarations: [
+        .....,
+        SummaryPipe
+    ]
+
+    so modify to be 
+
+     transform(value: string, limit?: number) {
+        if (!value)
+            return null;
+
+        let actualLimit = (limit) ? limit : 50;
+        return value.substr(0, actualLimit) + '...';
+    }
+
+    To add more parameters, simply define the param.
+
+    transform(value: string, limit?: number, another?: any) {
+        if (!value)
+            return null;
+
+        let actualLimit = (limit) ? limit : 50;
+        return value.substr(0, actualLimit) + '...';
+    }
+
+
+exercise - favorite component 
+
+    Toggle component, like button.
+
+solution - favorite component 
+
+exercise - TitleCase 
+
+    of 
+    and 
+    the 
+
+    should be lowercase 
+    unless it's the first word of a sentence 
+
+    every word, the first letter should be uppercase 
+
+Solution - Title Case 

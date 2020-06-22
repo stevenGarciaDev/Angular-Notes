@@ -1,0 +1,470 @@
+Introduction
+
+Building Blocks of Angular Apps 
+
+Creating Components
+
+Creating Components Using Angular CLI  
+
+Templates 
+
+Directives
+
+Services
+
+Dependency Injection 
+
+Generating Services Using Angular CLI 
+
+Exercise - Authors 
+
+Solution 
+
+A Quick Note 
+
+/* -----------------------------
+
+Introduction
+
+Building Blocks of Angular Apps 
+
+    Components 
+    // 100s in a production app 
+
+    What is a component?
+
+        => it encapsulates the data, the HTML, and the logic 
+        for the view 
+
+        * Data 
+        * HTML 
+        * logic 
+
+    The view is broken up into maintainable into reusable and testable components.
+
+    Can break them up into smaller components and reuse in multiple places 
+    or even use in another app. 
+
+    App is the root component. 
+
+    A real world Angular app is a tree of components with App.js as the root. 
+
+    In Angular also have a concept called Modules.
+
+    // a group of related components 
+
+    App module 
+
+    As application grows, you would like to break it up into smaller.
+
+    Such as 
+
+        Course Module 
+
+        Messaging Module 
+
+        Instructor Module 
+
+        Admin Module 
+
+    Consider a supermarket. Have different aisles for differnt products. 
+
+    The bigger the supermarket the more aisles we have, likewise a large production app 
+    will have more components. 
+
+    Each responsible for a specific area of our application. 
+    
+
+Creating Components
+
+    Three steps to follow to use a component. 
+
+    * create a component 
+    * register it in a module 
+    * add an element in an HTML markup 
+
+    In hello-world project 
+
+    $ ng serve 
+
+    src/app/
+
+        // note that multiple words are separated with a hyphen -
+        $ touch courses.component.ts 
+
+        // Need to add metadata.
+        // A decorator to make it a component.
+        // Pass it an object with properties to tell it how it should work.
+
+         // With the selector property, we can extend the HTML vocabulary. (the elements)
+
+        import { Component } from '@angular/core';
+
+        @Component({
+            selector: 'courses',
+            template: '<h2>Courses</h2>'
+        })
+        export class CoursesComponent {
+
+        }
+
+    2nd step is register it in a module.
+
+    app/
+        app.module.ts 
+
+        Have 3 import statements 
+
+        // Convert a plain TypeScript class into a module for Angular.
+        // Declarations is where we add all the components which belong to this module.
+
+        @NgModule({
+            declarations: [
+                AppComponent,
+                CoursesComponet
+            ],
+            ......
+        })
+
+    3rd step is display 
+
+        // Install auto import 
+        // Restart VSCode 
+
+        app.component.html 
+
+        // Clear the markup 
+
+        <h1>Angular</h1>
+        <courses></courses>
+
+Creating Components Using Angular CLI     
+
+    There are two problems with the previous approach. 
+
+    -> it's a little bit tedious
+
+        // lots of boilerplate 
+
+    -> also if forget the second step then our application will break
+
+    ctrl + backtick will open the terminal in visual studio code. 
+
+    Use Angular CLI to generate a component. 
+
+    $ ng generate component course 
+
+    // ng g c 
+
+    Angular creates a directory and inside creates 4 files 
+        // css file, html file, test file, and TypeScript file for the component 
+
+    Also updates app.module.ts 
+    and registers the component. 
+
+    Ctrl + b to open the navigation menu 
+
+    // so now we don't need to register our components manually
+
+    Also have OnInit which is an interface 
+
+
+    export class CoursesComponent implements OnInit {
+
+
+        ngOnInit() {
+
+        }
+    }
+
+Templates 
+
+    {{ }}
+    // This is used to render something in our template dynamically 
+    // and evaluated at runtime to be placed in the DOM. 
+    // Angular updates the DOM for us 
+    // via data binding. 
+    // notified and updated 
+
+    Any valid JavaScript expression can go within {{ }}
+
+
+
+    import { Component } from '@angular/core';
+
+    @Component({
+        selector: 'courses',
+        template: '<h2>{{ title  }}</h2>'
+    })
+    export class CoursesComponent {
+        title = "List of courses";
+
+        getTitle() {
+            return this.title;
+        }
+    }
+
+    {{ "Title" + title }}
+
+
+    ---
+
+    
+    import { Component } from '@angular/core';
+
+    @Component({
+        selector: 'courses',
+        template: '<h2>{{ getTitle()  }}</h2>'
+    })
+    export class CoursesComponent {
+        title = "List of courses";
+
+        getTitle() {
+            return this.title;
+        }
+    }
+
+    So {{ }} is known as string interpolation.
+
+
+Directives
+
+    With backticks, we can break it up into multiple lines. 
+
+    We use directives to manipulate the DOM. 
+
+    We can use them to add a DOM element, remove, or change the class, 
+    or its style. etc. 
+
+    They are used similar to an attribute in HTML. 
+
+    When using a directive that modifies the structure of the DOM you should prefix 
+    it with *.
+
+    So within ngFor, we use syntax similar to what we would put in a foreach block. 
+
+        let,
+            we define a variable, 
+
+        of is a special keyword,
+        and courses is the field that we are iterating over. 
+
+        Angular will then iterate over.
+
+    In most real world apps, we get our data from the server. 
+    // utilized by a service
+
+
+    --------
+
+    import { Component } from '@angular/core';
+
+    @Component({
+        selector: 'courses',
+        template: `
+            <h2>{{ title }}</h2>
+            <ul>
+                <li *ngFor="let course of courses">
+                    {{ course }}
+                </li>
+            </ul>
+        `
+    })
+    export class CoursesComponent {
+        title = "List of courses";
+        // In real world, we would have objects. 
+        courses = ["course1", "course2", "course3"]
+
+        getTitle() {
+            return this.title;
+        }
+    }
+
+
+Services
+
+    Need to call an HTTP endpoint. 
+
+    // Add logic for calling an HTTP service here in the component. 
+    // Problem is that the logic is tightly coupled to the HTTP endpoint and the component. 
+
+    We don't want to be dependent on the implementation. 
+
+    It'll be harder to execute those unit tests. 
+    We use a fake HTTP service for our tests. 
+
+    Maybe somewhere else, we could benefit from reusing that HTTP service call. 
+
+    Third issue is that a component should not include any logic other than the presentation logic. 
+
+    // What should happen when we click a button, when we select an item from a list, etc. 
+
+
+    In app/ 
+
+        $ mkdir 
+
+        courses.service.ts 
+
+        By convention we have the word, service in the file name. 
+
+
+        In Angular, we don't have a decorator for a service so it's essentially 
+        a plain TypeScript class. 
+
+
+        export class CoursesService {
+            getCourses() {
+                return ["course1", "course2", "course3"];
+            }
+        }
+
+
+        ---
+
+        export class CoursesComponent {
+            title = "List of courses";
+            courses; 
+        }
+
+
+Dependency Injection 
+
+    export class CoursesComponent {
+        title = "List of courses";
+        courses; 
+
+        constructor() {
+            // The new keyword is a code smell that you have tight coupling. Avoid it 
+            // as it makes it harder to unit tests and harder to modify in the future. 
+            // Fragile and need to update in multiple places. 
+            let service = new CoursesService();
+            courses = service.getCourses();
+        }
+    }
+
+    Instead we can ask Angular to do this for us. 
+
+    export class CoursesComponent {
+        title = "List of courses";
+        courses; 
+
+        // Angular looks at our constructor and sees how this component has a dependency.
+        // So it creates an instance of the CoursesService and passes it to the constructor for us.
+        // Angular instantiates it for us! :)
+        // Also when we unit tests, we can easily supply a fake implementation of the service 
+        // that doesn't use it on the backend. 
+
+        // We have succesfully decoupled.
+        // NOTE: Using the new keyword is no bueno. Try to avoid if you can. 
+        constructor(service: CoursesService) {
+
+        }
+    }
+
+    // We need to instruct Angular to create an instance of CoursesService and pass it to our component.
+
+    => Dependnecy Injection 
+
+        Instruct Angular to inject the dependnencies to our component. 
+
+        // it's a way to produce loosely coupled and testable code 
+        // by having a framework provide our instantiated dependnencies externally 
+        // rather than internally with the new keyword.     
+
+        def: 
+            Providing the dependnencies of a class into constructors.
+
+        Angular has a dependency injection framework built into it. 
+
+        In order for that to work,
+        you need to register the dependnencies somewhere in your module. 
+
+    In app.module.ts 
+
+        Look at the @NgModule decorator 
+
+        within you see 
+
+        providers: [],
+
+        Simply register all the dependnencies that the components in the module 
+        are dependent upon. 
+
+    import { CoursesService } from './c
+
+
+    providers: [
+        CoursesService
+    ],
+
+    If you forget to register your dependencies, 
+    will see error in the browser console. 
+
+        ERROR: No provider for CoursesService 
+
+        The error tells you that you have not registered the service 
+        as a provider. 
+
+    Angular will create a single instance of that class for the entire module. 
+
+    Singleton pattern, 
+    so just one instance in memory will be utilized for ALL the components 
+    which is good for utilizing memory. 
+
+
+
+Generating Services Using Angular CLI 
+
+    $ ng generate service email 
+
+    // ng g s 
+
+
+    So this will generate a service file as well as a .spec boilerplate code for 
+    writing unit tests for that service. 
+
+    The Injectable decorator, is used only if the service had 
+    dependencies in its constructor. 
+
+    Such as a logService.
+
+    This tells Angular that this is an injectable class meaning that Angular 
+    should be able to inject dependencies into the constructor.
+
+    Didn't use it for components as when we use the @Component decorator it internally 
+    includes Injectable.
+
+
+
+    import { Injectable } from '@angular/core';
+
+    @Injectable()
+    export class EmailService {
+        constructor() {
+
+        }
+    }
+
+Exercise - Authors 
+
+    Angular 
+    3 Authors 
+    * author1
+    * author2
+    * author3 
+
+
+
+Solution 
+
+    // shortcut 
+    // ul>li 
+    // then tab 
+
+    Prefix, as to minize the chance of another component from a 3rd party library. 
+    // That's why prefix with app-author for example 
+    
+    ----
+
+A Quick Note 

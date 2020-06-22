@@ -1,0 +1,224 @@
+Introduction 
+
+What is Redux 
+
+Building Blocks of Redux 
+
+Pure Functions 
+
+Installing Redux 
+
+Working with Actions 
+
+The Select Pattern 
+
+Avoiding Object Mutations 
+
+Using Immutable objects 
+
+Exercise 
+
+Redux DevTools 
+
+Calling APIs 
+
+Refactoring fat case statements 
+
+dealing with complex domains
+
+/* ---------------------------------
+
+Introduction     
+
+What is Redux
+
+    Def: A library that helps you manage the state of your application. 
+
+    Something to use in medium to large SPA with complex data flows. 
+
+    // Not a simple app and simple data flow 
+
+    It adds complexity..
+
+    SPA 
+        without Redux architecture 
+
+        Each component maintains the state and logic behind a view.
+
+        This models aligns with encapsulation principle of OOP 
+
+    However it can be a problem when you have multiple views that are working 
+    with the same piece of data and do not have a parent-child relationship. 
+
+    We often have multiple copies of the same data that are independent of each other. 
+
+    So when a view updates a model, need to do extra work to keep the other views in sync. 
+
+    Common solution is to use event which creates event spaghetti and to keep track what 
+    happens to the application state.
+    // becomes confusing and difficult to track bugs 
+    as the state can be updated in an unpredictable way 
+
+    Also adding a new feature becomes a challenge as you don't know the impact of the new feature 
+    on the application state. 
+
+    If it's touching the same piece of data that is in different places that needs to be in sync. 
+
+    -
+
+    Facebook introduced the Flux architecture. 
+
+    Redux is a lightweight library that implements the Flux architecture
+
+    => Manage the application state in a predictable way.
+
+    Benefits 
+
+    * predictable application state 
+    * decoupled architecture
+
+        Allows you to postpone decisions about external frameworks.
+
+    * testability 
+
+        Easier without mocks, 
+
+        Because Redux is heavily based on functional programming
+
+        take a state and return a new state 
+        // easy to test 
+        // TDD 
+
+    * great tooling 
+
+        Redux DevTools extention to your browser 
+
+        Makes it incredibly easy to debug your application 
+        by allowing you to inspect the application state in such a way.
+
+        One feature that is impressive. 
+
+    * undo/redo 
+
+        Incredibly easy to implement this feature.
+
+    Cost 
+
+        More moving parts and complexity.
+
+    When to use Redux 
+        - independent copies of the same data in multiple places 
+        - multiple views that need to work with the same data and be in sync 
+        - data can be updated by multiple users 
+        - data can be updated by multiple actors 
+
+    Start simple, then future refactor to utilize Redux. 
+
+Building Blocks of Redux 
+
+    3 pieces 
+
+        * store 
+        * actions 
+        * reducers 
+
+     SUMMARY:
+    ----
+    Store => a single JS object that contains the state of the application 
+    Actions => plain JS objects that represent something that has happened in the application 
+    Reducer => a function that specifies how the state changes in response to an action 
+
+
+    The Store 
+
+        => a single JS object that contains the state of the application 
+
+        // like a local client side database 
+
+        Example:
+
+        {
+            messages: [...],
+            newMessages: 5,
+            chatSoundsEnabled: true 
+        }
+
+        So different components use different parts, or different slices of the application state.
+
+        Also means that different components, can refer to a single source of truth. 
+
+        The changes are immediatly visible to other components. 
+
+        Too much memory?
+            No unless storing 10,000 or more objects. 
+
+            For most part it's ok to have a single object to the application state. 
+
+    Action
+
+        => plain JS objects that represent something that has happened in the application 
+
+        Semantically they are more like Events 
+
+        Commands/actions represent something that should happen 
+
+        Events indicate that something HAS happened 
+
+        Actions are symnatically events 
+
+
+        Ex:
+
+        When a user reads a message 
+
+            { type: 'MARK_AS_READ' }
+
+            or 
+
+            { type: 'POST_MESSAGE', body: '...' }
+
+        By convention use a type property.
+
+    
+    Reducer 
+
+        => a function that specifies how the state changes in response to an action 
+
+        // think of it as an action or event handler 
+        that determines how the state is changed 
+
+        A reducer does NOT modify the state, it only returns the NEW state. 
+
+        The store will internally update the state.
+
+        NOW ALLOWED!
+
+            state.messages.push(...)
+
+            NOPE, you don't directly modify it,
+            the store does that for you 
+
+Pure Functions 
+
+    * same input -> same output 
+    * no side effects
+
+Installing Redux 
+
+Working with Actions 
+
+The Select Pattern 
+
+Avoiding Object Mutations 
+
+Using Immutable objects 
+
+Exercise 
+
+Redux DevTools 
+
+Calling APIs 
+
+Refactoring fat case statements 
+
+dealing with complex domains

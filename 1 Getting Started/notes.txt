@@ -1,0 +1,392 @@
+Getting Started
+--
+
+Introduction 
+
+What is Angular 
+
+Architecture of Angular Apps 
+
+Setting up the Development Environment
+
+Your First Angular App 
+
+Structure of Angular Projects 
+
+Webpack 
+
+Angular Version History 
+
+Course Structure 
+
+Making a Promise 
+
+/* ---------------------------
+
+Introduction 
+
+    Building an ecommerce application. 
+
+What is Angular 
+
+    Angular is a framework for building client applications 
+    in HTML, CSS, and JavaScript/TypeScript.
+
+    Angular is written in TypeScript.
+
+    Why do we need Angular?
+
+        Well you could use plain JavaScript and jQuery.
+
+        However, as the application gets more complex 
+        that code becomes hard to maintain.
+
+        We need a way to properly maintain the structure 
+        of our application.
+
+        There are JavaScript patterns such as 
+        Revealing Module Pattern and Prototype pattern 
+        to help with the structuring.
+
+        But these are hard to understand.
+
+        Lots of apps with vanilla JavaScript and jQuery 
+        are hard to tests.
+
+        So that's why Angular, React, and Vue are used.
+
+        It makes web development easier.
+
+    Benefits 
+
+        * gives our applications a clean structure 
+
+        * includes a lot of re-usable code 
+
+        * makes our applications more testable 
+
+    Using Angular makes your life easier.
+
+Architecture of Angular Apps 
+
+    Modern applications have a front-end and the back-end.
+
+    Front-end is what the user sees and interact with in the browser.
+    HTML, CSS, and TypeScript/JavaScript
+
+    The back-end sits on multiple web servers in the cloud,
+    and is responsible for storing the data and doing processing
+    on that data.
+
+    Client communicates with the backend.
+
+    You don't save data on the client as it doesn't persist.
+    Rather it will just be kept in some temporary state.
+
+    So have HTTP services (APIs).
+
+    Application Programming Interface 
+
+        => endpoints that are accessible via the HTTP protocol 
+
+    Can GET or save the data through HTTP
+
+    -
+    Client has the HTML templates and the presentation logic 
+    for how to respond to user events.
+
+Setting up the Development Environment
+
+    Install Node
+    // it's a runtime Environment for executing JavaScript code 
+    // outside of the browser 
+
+    $ node --version 
+
+    Use NPM to install 
+
+        Angular CLI 
+        (command line interface)
+
+        to create a new Angular project, generate boilerplate,
+        and create deployable packages 
+
+    $ npm install -g @angular/cli 
+
+    // with a Mac you need to do sudo in the front 
+
+    $ ng --version 
+
+Your First Angular App 
+
+    $ ng new hello-world
+
+    With Visual Studio code, add it to your path.
+
+    on Windows 
+    shift + ctrl + p 
+
+        >code 
+        >install 'code' command in PATH 
+
+    in terminal in that folder 
+
+    $ code . 
+    // and this will open VSCode 
+
+    $ ng serve
+
+Structure of Angular Projects 
+
+    e2e/
+
+        These are tests with selenium that simulate a real user.
+
+    node_modlues/
+
+        Our project dependencies.
+        We don't deploy this folder to a server.
+
+        This app is purely for development and should be listed in 
+        the .gitignore file so that it is not tracked with version control.
+
+        Parts of these are put into a bundle and deployed.
+
+        So you are not going to put the node_modules onto a server.
+
+    src/
+
+        (Where the source code of our application goes)
+
+        app/
+
+            Here you have a module and a component 
+
+            So every application has at least one module and one component.
+
+        assets/
+
+            The static assets of our application.
+
+            So images files, text files, icons,
+
+        Environments/
+
+            Where we store configuration settings
+            for different Environment.
+
+
+            One for the production Environment.
+            One for the development environment.
+
+        Other files are 
+        favicon.ico 
+
+        index.html 
+            // the references will be dynamically inserted into the page 
+
+        main.ts 
+            
+            The starting point of our application.
+
+            Many programming languages have the concept of the Main method 
+            which is essentially the starting point of the application.
+
+            Same concept in our Angular application.
+
+            We are bootstrapping the module,
+            Angular loads it and it starts from there.
+
+        polyfills.ts 
+
+            This file requires some scripts that are required for 
+            running Angular.
+
+            The Angular framework uses features of JavaScript 
+            which are currently not available in browsers.
+
+        styles.css 
+
+            Global styles for our application.
+            Each page/component can have its own styles.
+
+        test.ts 
+
+            This file is used for setting up our testing enviroment.
+
+    
+    .angular-cli.json 
+
+        This is a configuration file.
+        This is a standard configuration.
+
+    .editorconfig 
+
+        If working with a team enviroment,
+        you want to make sure that all the other developers 
+        on the team use the same settings in their editors.
+
+        This is where you store your settings.
+
+    .gitignore 
+
+        For exclusing files and folders from your git repository.
+
+    karma.conf.js 
+
+        A config file for karma which is a test runner for JavaScript code. 
+
+    package.json 
+
+        This file list the project dependencies.
+        Every node project has this.
+
+    protractor.conf.js 
+
+        This is a tool for running end to end tests for Angular.
+
+    tsconfig.json 
+
+        This has a bunch of settings for your TypeScript compiler.
+
+        Based on these settings, it's going to compile your code into JavaScript
+        that browsers can understand.
+
+    tslint.json 
+
+        This includes a number of settings for tslint 
+        which is a static analysis tool for TypeScript code.
+
+        It checks your TypeScript code for readability, maintainability, and functionality errors.
+
+    
+Webpack 
+
+    In app/
+
+        app.component.ts 
+
+    --
+
+    import { Component } from '@angular/core';
+
+    @Component({
+        selector: 'app-root',
+        templateUrl: './app.component.html',
+        styleUrls: ['./app.component.css']
+    })
+    export class AppComponent {
+        title = 'Angualar app';
+    }
+
+    ...
+    webpack compiling 
+
+    So Angular uses a tool called Webpack which is a build automation tool.
+
+    It gets all our scripts and stylesheets,
+    combines them in a bundle and then minifies that bundle 
+    for optimization.
+
+    polyfills.bundle.js 
+
+        These include all the scripts to fill the gap between the version 
+        of JavaScript that Angular needs and the version of JavaScript 
+        supported by most browers.
+
+    main.bundle.js 
+
+        All the source code of our application.
+
+    styles.bundle.js 
+
+        These include all our stylesheets.
+        // notice that they are stored in a JavaScript bundle.
+
+    vendor.bundle.js 
+
+        These include all the 3rd party libraries.
+
+        Unfortunetly,
+        can't customize the name of the bundles or add different bundles.
+        // may have changed 
+
+    inline.bundle.js
+
+
+    Note, whenever you change a file in your project,
+    Webpack will automatically recompile your application
+    and refreshes your bundles. 
+
+    Hot Module Replacement (HMR)
+
+    -
+    View Page source 
+
+        at the bottom, notice the script tags,
+
+        Those are injected in index.html 
+
+    -
+    in index.html 
+
+        At runtime, Webpack injects the scripts into it.
+
+
+Angular Version History 
+
+    What's the difference between 
+    AngularJS, Angular 2, and Angular 4 ?
+
+    AngularJS 
+        2010 
+
+        JS framework for client applications
+
+        Framework was not designed with the needs of today's modern applications 
+        and it was overly complex.
+
+    
+    Angular team decided to rewrite the original framework using TypeScript.
+
+    Angular 2 
+        2016
+
+        This version is entirely different from Angular 1.
+
+        // It's a completely different framework.
+
+        There were legacy apps in Angular 1.
+
+        Overall the direction that it took was cleaner and easier.
+
+    jumped from 2 to 4.
+
+
+    Angular consists of libraries which are separated by different packages 
+    via NPM.
+
+    @angular/core 
+        2.3.0
+
+    @angular/compiler 
+        2.3.0
+
+    @angular/http
+        2.3.0
+
+    @angular/router 
+        3.3.0
+
+    In order to align these versions and avoid conversions,
+    the Angular team went straight to Angular 4.
+
+    It's not a major upgrade compared to 2.
+
+    Now the framework is just called, Angular.
+
+    
+
+Course Structure 
+
+Making a Promise 

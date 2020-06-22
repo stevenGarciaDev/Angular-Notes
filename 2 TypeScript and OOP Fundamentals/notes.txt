@@ -1,0 +1,597 @@
+Introduction 
+
+What is TypeScript 
+
+Your first TypeScript program 
+
+Declaring Variables 
+
+Types 
+
+Type Assertions 
+
+Arrow Functions 
+
+Interfaces 
+
+Classes
+
+Objects 
+
+Constructors 
+
+Access Modifiers 
+
+Access Modifiers in Constructor Parameters 
+
+Properties 
+
+Modules 
+
+Exercise 
+
+Solution 
+
+/* -------------------------------
+
+Introduction 
+
+    You need to be comfortable with TypeScript to be an Angular developer.    
+
+What is TypeScript 
+
+    TypeScript is a superset of JavaScript.
+
+    So any valid JavaScript code is also valid TypeScript code.
+
+    TypeScript has additional features which the JavaScript run on 
+    modern browsers does not support.
+
+    Example 
+
+        * strong typing 
+            (when you define a variable, you have to specify the type of that variable)
+
+            it is optional but it makes our apps more predictable
+            and easier to debug them when something goes wrong.
+
+        * object-oriented features 
+
+            // classes, interfaces, access modifiers, fields, properties, generics, etc.
+
+        * compile-time errors 
+
+            // rather than run-time 
+            // as there is a compilation step involved
+
+        * Great tooling 
+
+            Intellisence in our code editor.
+
+    So browsers don't understand TypeScript.
+
+    TypeScript -> (transpile) -> JavaScript for browser 
+    // this is part of building our application 
+
+Your first TypeScript program 
+
+    In the terminal,
+
+    Install TypeScript globally on your machine.
+
+    $ npm install -g typescript 
+    // on a Mac, you need sudo 
+
+    $ tsc --version
+    // tsc, stands for TypeScript compiler
+
+    $ mkdir ts-hello 
+
+    $ cd ts-hello 
+
+    $ code main.ts 
+
+        function log(message) {
+            console.log(message);
+        }
+
+        var message = 'Hello World';
+
+        log(message);
+
+    So need to transpile that file into JavaScript.
+
+    $ tsc main.ts 
+
+    // now when list out 
+
+        main.js 
+        main.ts 
+
+    This happens under the hood with Angular, with ng serve,
+    transpiles all our TypeScript code.
+
+    Remember that all valid JavaScript code is valid TypeScript code.
+
+    $ node main.js 
+
+Declaring Variables 
+
+    The ways to declare a variable.
+
+    var number = 1;
+
+    or the let keyword 
+
+    const 
+
+    ES5 is supported by all browsers.
+
+    The let keyword only exist within the block that it is defined.
+
+    However, var exist within the function that it is defined.
+    
+    So TypeScript is compiled to valid ES5 as to be valid for 
+    all browsers.
+
+Types 
+
+    let count = 5;
+
+    // TypeScript is static typing.
+    // Whereas JavaScript is dynamic typing.
+
+    You can compile it to valid JavaScript code, however TypeScript will give you warnings.
+
+    Hover over the variable, the tooltip will indicate the data type of count.
+    (in a TypeScript extension file)
+
+    let a;
+    // The data type is now, any 
+    // Which is same as in JavaScript (abstractly)
+
+    Use type annotations.
+
+    let a: number;
+    a = 2;
+
+    Different types 
+
+        number 
+        // any int, floating points,
+
+
+        boolean 
+
+        string 
+
+        any 
+
+        number[]
+
+    let e: number[];
+    let j: number = [1, 2, 3];
+    let f: any[] = [1, true, 'a']; // avoid this!
+
+    // Can put related constants in a container.
+    enum Color { Red, Green, Blue };
+    let backgorundColor = Color.Blue;
+    // The first element, gets the value of 0, and each subsequent value 
+    // gets an incremented value.
+
+    // Best practice is to explicitly set it.
+    // As to ensure that it doesn't break by someone changing it in the future.
+
+
+    enum Color { Red = 0, Green = 1, Blue = 2, Purple = 3 };
+
+    Once compiled it becomes 
+
+    (function(Color) {
+        Color[Color["Red]] = 0] = "Red";
+        Color[Color["Green]] = 1] = "Green";
+        Color[Color["Blue]] = 2] = "Blue";
+        Color[Color["Purple]] = 3] = "Purple";
+    })(Color || Color = {}));
+
+Type Assertions 
+
+    let message = 'abc';
+    message.
+
+    // Will see the methods, where the purple icons are methods.
+
+    let endsWithC = message.endsWith('c');
+
+    Sometimes TypeScript will be confused about the type of a variable.
+
+    What if you did?
+
+    let message;
+    message = 'abc';
+
+    // Now you won't get the intellisence when using the message reference.
+    // You need to explicilty tell the TypeScript compiler the datatype.
+    // This is known as type assertions.
+
+    There are two ways.
+    Prefix with brackets.
+
+    // This way is more commonly used.
+    let endsWithC = (<string>message).endsWith('c');
+
+    let alternativeWay = (message as string).endsWith('c');
+
+Arrow Functions 
+
+    function performLog(message) {
+        console.log(message);
+    }
+
+    let log = function(message) {
+        console.log(message);
+    }
+
+    // Lambda expression in C#.
+    // Called an arrow function in TypeScript/JavaScript.
+    let doLog = (message) => console.log(message);
+
+
+Interfaces 
+
+    let drawPoint = (x, y, a, b, c, d, e) => {
+        // ...
+    }
+
+    See how there are so many arguments that need to be passed.
+    Instead we want to encapsulate them inside an object and just 
+    pass that object as the argument.
+
+    let drawPoint = (point) => {
+        //
+    }
+
+    drawPoint({
+        x: 1,
+        y: 2
+    })
+
+    There's another problem as another object could be passed.
+
+    There are two solutions.
+
+    One way is inline annotation.
+
+    With a custom type/object.
+
+        // Verbose, avoid as this is not reusable or clean.
+        let drawPoint = (point: { x: number, y: number }) => {
+
+        }
+
+    Instead use an interface.
+
+    // With an interface, we define the shape of an object.
+    interface Point {
+        x: number,
+        y: number
+    }
+
+    let drawPoint = (point: Point) => {
+
+    }
+
+    
+
+Classes
+
+    There's a problem with the interface implementation.
+
+    In OOP languages,
+    there's a concept called cohesion.
+
+    Basically means that things that are related should be part of one unit.
+
+    They should go together.
+
+    -
+
+    So we defined an interface and then a standalone function.
+    This has violated the cohesion principle.
+
+    Chances are that you will create another utility function so you would be best 
+    served to group them all together.
+
+    Class 
+        => groups variables (properties) and functions (methods) 
+        that are highly related
+
+    interface Point {
+        x: number,
+        y: number,
+        draw: () => void
+    }
+
+    Interfaces are simply declarations, we can't actually implement.
+
+    Instead use a class.
+
+    class Point {
+        // Fields are for storing data.
+        x: number;
+        y: number;
+
+        draw() {
+            console.log('X': ' + this.x + ', Y ' + this.y);
+        }
+
+        getDistance(another: Point) {
+            //
+        }
+    }
+
+    So now everything about a point is in one unit.
+
+Objects 
+
+
+    
+    let point = new Point();
+    // could also do 
+    // let point: Point = new Point();
+    // but that's overly verbose 
+
+    point.x = 1;
+    point.y = 2;
+    
+    // property is different from a field,
+    // will learn them later 
+
+    point.draw();
+
+
+    $ tsc main.ts 
+
+    $ node main.js 
+
+
+Constructors 
+
+    Can utilize a constructor to have our object be initialized 
+    in a valid state. 
+
+    Every class has a constructor which is a method called 
+    when you create an instance of that class. 
+
+    class Point {
+        x: number;
+        y: number;
+
+        // The question mark by the parameter variable 
+        // tells the transpiler that the parameter is optional.
+        // Once a parameter is optional then the following list 
+        // must also be marked as optional.
+        constructor(x?: number, y?: number) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    let point = new Point(1, 2);
+    point.draw();
+
+Access Modifiers
+
+    How to set a readonly value?
+    To prevent it from being changed,
+    we have access modifiers.
+
+    This is a keyword that you can apply to a member of a class 
+    to decide its access from the outside.
+
+    // Can be applied for fields, properties, and methods.
+
+    Access Modifiers in TypeScript 
+    // By default all members are public in TypeScript.
+
+        * public 
+
+        * private 
+
+        * protected
+
+    class Point {
+        private x: number;
+        private y: number;
+
+        constructor(x?: number, y?: number) {
+            this.x = x;
+            this.y = y;
+        }
+    }    
+
+Access Modifiers in Constructor Parameters 
+
+    The code below is a bit redundant and TypeScript provides 
+    a feature for you to implement this with less code.
+
+    class Point {
+        private x: number;
+        private y: number;
+
+        constructor(x?: number, y?: number) {
+            this.x = x;
+            this.y = y;
+        }
+    }    
+
+    becomes 
+
+   class Point {
+       // So TypeScript compiler will generate these fields for us.
+       // We also don't need the repetitive assignments within the block.
+       // If we prefix the constructor parameter with an access modifier,
+       / either private or public, TypeScript compiler will generate a field 
+       // with the exact same name and it will also initialize that field 
+       // to the value of the arguments.
+       // It's a great feature! :)
+        constructor(private x?: number, private y?: number) {
+        }
+    }  
+    
+
+Properties 
+
+    
+   class Point {
+        constructor(private _x?: number, private _y?: number) {
+        }
+
+        getX() {
+            return this.x;
+        }
+
+        setX(value: number) {
+            if (value < 0)
+                throw new Error('value cannot be less than 0');
+            
+            this._x = value;
+        }
+    }  
+
+    let point = new Point(1, 2);
+    let x = point.getX();
+    point.setX(10);
+
+    // Could instead use properties in TypeScript.
+
+    Instead you do 
+
+
+    get x() {
+        return this._x;
+    }
+
+    set x(value: number) {
+        if (value < 0)
+            throw new Error('value cannot be less than 0');
+        
+        this._x = value;
+    }
+
+    let point = new Point(1, 2);
+    let x = point.x;
+    point.x = 10;
+
+    // You could also just not apply a get or set.
+    // To determine the properties access rights.
+
+    You use camel notation to name your fields and functions.
+
+    You use pascal notation to name your classes and properties.
+
+    Also for your field, you prefix it with an underline.
+
+    A property looks like a field form the outside but it's actually a method.
+
+    // its a getter or a setter essentially.
+
+Modules 
+
+    In a real world application, there are hundreds of files.
+
+    We want to separate our classes into their own files. 
+
+    Point.ts 
+    // where the class implementation is saved.
+
+    In TypeScript we have this concept called modules.
+
+    Simple, pragmatic definition 
+
+        Each file is a module.
+        // heuristic
+
+    In Point.ts,
+    it's not accessible outside the file.
+    // Node.js 
+
+    It defines its own scope.
+
+    In order to use that class somewhere else in the program, must export it.
+
+    export clsas Point {
+            ....
+    }
+
+    With the export keyword, TypeScript now identifies this file as a module. 
+
+    --
+
+    in Main.ts 
+
+    
+    import { Point } from './Point';
+
+    // There's more to learn in modules which will be covered later in the course.
+    // Angular modules, don't need relative paths as often use 
+    // library name in node_modules 
+
+
+    In TypeScript divide program into multiple files.
+    In each file we export one or more types. 
+    We import them in another module which utilizes them. 
+
+Exercise 
+
+    ... 
+    refer to _AngularProjects
+
+Solution 
+
+    like.component.ts 
+
+    export class LikeComponent {
+        constructor(private _likesCount: number, private _isSelected: boolean) {
+        }
+
+        onClick() {
+            this.isSelected = !this.isSelected;
+            this.likesCount += (this.isSelected) ? 1 : -1;
+        }
+        
+        get likesCount() {
+            return this._likesCount;
+        }
+
+        get isSelected() {
+            return this._isSelected;
+        }
+    }
+
+    Main.ts 
+
+        import { LikeComponent } from './LikeComponent';
+
+        let component = new LikeComponent(10, true);
+        component.onClick();
+
+        // Template string.
+        console.log(`likesCount: ${component.likesCount}, isSelected: {this.isSelected}`);
+
+    So see the error,
+    Accessors are only available when targeting ECMAScript 5 or higher.
+
+    So pass to TypeScript compiler.
+
+    $ tsc *.ts --target ES5 && node main.js 
+    // Now it should work.
+
+    In a lot of Angular application, often use fields and not properties.
+    
+    That issue doesn't happen in Angular application as we bind an element to a view 
+    to a field in our component.
+
+    The value is then displayed on the user interface.
+
+    Modification only happens through a DOM event.

@@ -1,0 +1,377 @@
+Introduction 
+
+Component API 
+
+Input Properties 
+
+Aliasing Input Properties 
+
+Output Properties 
+
+Passing Event Data 
+
+Aliasing Output Properties 
+
+Templates 
+
+Styles 
+
+View Encapsulation 
+
+ngContainer 
+
+Exercise - LikeComponent 
+
+Solution - LikeComponent 
+
+A Quick Note 
+
+/* ----------------------------
+
+Introduction 
+
+Component API 
+
+    Property binding with [] syntax to bind properties of DOM objects to fields of our host component.
+
+        Think of the src attribute as an input.
+
+    Event binding to respond to the events raised by a DOM output.
+
+    <favorite></favorite>
+
+    So our custom made components don't have an events or property binding. 
+    So it's not reusable. 
+
+    export class AppComponent {
+        post = {
+            title: "Title",
+            isFavorite: true
+        }
+    }
+
+    Now to display the post. 
+
+    Can't use property binding in this way 
+
+        <favorite [isFavorite]="post.isFavorite"></favorite>
+
+    Unhandled Promise Rejection: can't bind since it isn't a known property 
+
+    -
+
+    In Angular templates, for you to use property binding, you have to define it as 
+    an Input property. 
+
+    You want to be notified when <favorite> component is clicked. 
+
+        <favorite [isFavorite]="post.isFavorite" (change)="onFavoriteChange()"></favorite>
+
+    For event binding, need to define an output property.
+
+
+    So in order to make a Component reusuable, need to add Input and Output properties. 
+
+    Input is for the state. 
+    Output properties is to raise events from this custom components. 
+
+    That is what makes up the public API of that component. 
+
+Input Properties 
+
+    Two ways to mark a field as an input property. 
+
+
+    import { Component, OnInit, Input } from '@angular/core';
+
+    @Component({
+        ......
+    })
+    export class FavoriteComponent implements OnInit {
+        @Input() isFavorite: boolean;
+    }
+
+    // Input is a decorator for marking fields and properties 
+    // as input properties. 
+
+    Now that field is exposed to the outside and can bind it to a property in our templates. 
+
+
+        <favorite [isFavorite]="post.isFavorite"></favorite>
+
+    // so property binding now works!
+
+    2nd approach to mark a field as an input property 
+
+        Put it in the metadata of the component. 
+        As an array of strings. 
+
+        NOTE: There is a problem with this approach. 
+        The problem is the use of magic strings that we pass to the inputs array. 
+        Brittle. 
+
+
+        @Component({
+            ......,
+            inputs: ['isFavorite']
+        })
+        export class FavoriteComponent implements OnInit {
+            isFavorite: boolean;
+        }
+
+
+Aliasing Input Properties 
+
+     @Component({
+        ......
+    })
+    export class FavoriteComponent implements OnInit {
+        @Input() isFavorite: boolean;
+    }
+
+    Maybe you don't want to use camelCase notation in your HTML markup.
+
+    Maybe 
+
+        // Can't do is-favorite in TypeScript/JavaScript 
+        // as it is not an acceptable identifier. 
+        <favorite [is-favorite]="post.isFavorite"></favorite>
+
+    The solution is to use an alias (a nickname for an input property)
+
+    For the input decorator, you can optionally supply a string to set an alias 
+    for this property. 
+
+    @Component({
+        ......
+    })
+    export class FavoriteComponent implements OnInit {
+        @Input('is-favorite') isFavorite: boolean;
+    }
+
+    ---
+
+    Using an alias, also has another benefit. 
+
+    It keeps the contract of the API stable. 
+
+    So even if change the name of the field, you pass in that magic string for the @Input() 
+    and it'll remain the same for when you use it in your HTML. 
+
+    We are minimizing the impact of the changes. 
+
+    Pressing f2 you can change all the occurences in our TypeScript code. 
+    // in VSCode 
+
+    For building reusable components, give the @Input decorator an arg.
+
+Output Properties 
+
+     <favorite [is-favorite]="post.isFavorite" (change)="onFavoriteChange()"></favorite>
+
+    Declare an output property. 
+
+
+    In Favorite component 
+
+
+    import { Component, Input, Output, EventEmitter } from '@angular/core';
+
+
+    @Component({
+        ......
+    })
+    export class FavoriteComponent implements OnInit {
+        @Input('is-favorite') isFavorite: boolean;
+        // Assign to an instance of the EventEmitter class.
+        @Output() change = new EventEmitter();
+
+        onClick() {
+            this.isSelected = !this.isSelected;
+            // We use the emit() method to raise or publish an event. 
+            // Basically we are notifying others that something has happend. 
+            this.change.emit();
+        }
+    }
+
+
+Passing Event Data 
+
+    app.component.ts 
+
+
+        Need to pass some data when emit that event. 
+
+    // Back in the favorite component. 
+    // It'll be available for all the subscribers of this event. 
+    // HERE WE EMIT 
+    // this.change.emit(this.isSelected);
+
+    export class AppComponent {
+        post = {
+            title: 'Title',
+            isFavorite: true 
+        }
+
+        // Our event handler 
+        onFavoriteChange(isFavorite) {
+            console.log("Favorite changed: " + isFavorite);
+        }
+    }
+
+    then in app.component.html 
+
+    Pass a dollar event object. 
+
+    // $event is a built in object in Angular. 
+    <favorite [is-favorite]="post.isFavorite" (change)="onFavoriteChange($event)"></favorite>
+
+    ---
+
+    Often instead of emitting or passing a boolean value, you would pass an object. 
+
+    So back in favorite.component.ts 
+
+        onClick() {
+            this.isSelected = !this.isSelected;
+            this.change.emit({ newValue: this.isSelected });
+        }
+
+    Back 
+
+    <favorite [is-favorite]="post.isFavorite" (change)="onFavoriteChange($event)"></favorite>
+
+    In our app.component.ts 
+    which is the subscriber of the change event for the favorite component.
+
+    // Could do inline annotation 
+    onFavoriteChanged(eventArgs: { newValue: boolean }) {
+        console.log("Favorite changed: ", eventArgs);
+    }
+
+    // OR better to define an interface 
+
+    interface FavoriteChangedEventArgs {
+        newValue: string
+    }
+
+
+        onFavoriteChanged(eventArgs: FavoriteChangedEventArgs) {
+            console.log("Favorite changed: ", eventArgs);
+        }
+
+    So if you are building a reusable component. 
+    You want to declare the interface in your implementation and then export it 
+    with your module. 
+
+    So would declare it in the favorite component and export it from there.
+
+Aliasing Output Properties 
+
+    Could also use an alias with an output property. 
+
+    @Output() change = new EventEmitter();
+
+    lets say it was changed to be 
+
+    @Output() click = new EventEmitter();
+
+        BUT our HTML is expecting the change event 
+
+        <favorite [is-favorite]="post.isFavorite" (change)="onFavoriteChange($event)"></favorite>
+
+    --
+    To make it more stable. 
+
+    @Output('change') click = new EventEmitter();
+
+
+Templates 
+
+    So you could also use 
+
+    template: ''
+
+    instead of 
+    templateUrl: '' 
+
+    but you can't mix those two approaches. 
+
+    It depends, if you are using a really small component 
+    then having it inline will make it more portable for sharing in a different 
+    application.
+
+    But if your template is more than 5 lines of code. 
+    Then it will get too noisy and better to store it externally.
+
+
+    @Component({
+        selector: 'favorite',
+        templateUrl: './favorite.component.html',
+        styleUrls: ['./favorite.component.css']
+    })
+
+
+    Our templates are bundled along with our source code. 
+    bundle.js 
+
+Styles 
+
+    As we build components, often need to apply styles. 
+
+    In Angular there are 3 ways to apply styles to a component. 
+
+    1) By using the metadata in the Component decorator 
+
+        So can specify one or more css files. 
+
+        stylesUrl: ['./favorite.component.css']
+
+    2) Use styles property inline in the Component metadata 
+
+        styles: [
+            `
+
+            `
+        ]
+
+    3) Writing them inline in our HTML template. 
+
+        <style>
+
+        </style>
+
+        AVOID THIS! 
+
+
+    Pick just one of the approaches. 
+
+    Template overrides all previous rules, unless others are more specific. 
+
+View Encapsulation 
+
+    Shadow DOM 
+
+    A specification that enables DOM tree and style encapsulation. 
+
+    => Allows us to apply scoped styles to elements without bleeding out 
+        to the outer world. 
+
+    // NOT all browsers support this 
+
+    Ex:
+
+        var el = document.querySelector('favorite');
+
+        el.innerHTML = `
+            <style>h1 { color: red }</style>
+            <h1>Hello</h1>
+        `;
+
+ngContainer 
+
+Exercise - LikeComponent 
+
+Solution - LikeComponent 
+
+A Quick Note 

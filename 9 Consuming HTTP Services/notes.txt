@@ -1,0 +1,527 @@
+Introduction 
+
+JSONPlaceHolder 
+
+Getting Data 
+
+Creating Data
+
+Updating Data 
+
+Deleting Data 
+
+OnInit Interface 
+
+Separation of concerns 
+
+Extracting a service 
+
+handling errors 
+
+handling unexpected errors 
+
+handling expected errors 
+
+throwing Application-specific errors 
+
+Code Review 
+
+Importing Observable Operators and Factory Methods 
+
+Global Error Handling 
+
+Extracting a reusable data service 
+
+The Map Operator 
+
+Optimistic vs Pessimistic Updates 
+
+Observables Vs. Promises 
+
+Exercise 
+
+Solution 
+
+/* ---------------------------
+
+Introduction 
+
+JSONPlaceHolder 
+
+    Angular is a front end framework for client applications.
+
+    Most real world applications need HTTP services on the server.
+
+    jsonplaceholder.typicode.com 
+
+    Under resources, you can see endpoints.
+
+Getting Data 
+
+    a NEW component called posts. 
+
+
+    To consume HTTP services.
+
+    app.module.ts 
+
+        import 'HttpClientModule' from '@angular/common/http';
+
+        imports: [
+            HttpClientModule
+        ]
+
+    then in posts 
+
+        import { HttpClient } from '@angular/common/http';
+
+        export class PostsComponent {
+            constructor(http: HttpClient) { }
+        }
+
+
+    If you forget to import the module.
+
+    Error: No provider for Http!
+
+    Dependency doesn't work, unless you register it as a module.
+
+    so by importing it, all the Dependency injection is setup properly.
+
+    ---
+
+    import { HttpClient } from '@angular/common/http';
+
+    export class PostsComponent {
+        posts: any[];
+
+        constructor(http: HttpClient) { 
+            // It returns an Observable<Response>
+            // Use promises and Observables to work with asynchronous or nonblocking operations.
+            // The data is not available immediately and will be a delay.
+            // We don't want the main thread to be blocked. 
+            // When the result is ready, we will be notified. 
+
+            // Pass in a subscription function which has access to the response.
+            // Usually we will convert it to a JSON object so that we can display data 
+            // to our views. 
+            http.get('http://jsonplaceholder.typicode.com/posts')
+                .subscribe(response => {
+                    //console.log(response);
+                    //console.log(response.json());
+                    this.posts = response.json();
+                });
+        }
+
+
+    }
+
+    ---
+
+    <p>posts works!</p>
+    <ul class="list-group">
+    <li *ngFor="let post of posts" class="list-group-item">
+        {{ post.title }}
+    </li>
+    </ul>
+
+    
+Creating Data 
+
+    Now to add the ability to create a new posts. 
+
+    Send an HTTP posts requests to create on the server. 
+
+    <input 
+        (keyup.enter)="createPost(title)" #title
+        type="text" class="form-control">
+
+    in component now 
+
+        private url = 'http://jsonplaceholder.typicode.com/posts';
+
+        constructor(private http: HttpClient) { }
+
+        // 2nd arg is the body of the request.
+        // A JSON object in form of a string for sending over the network.
+        // All methods of HttpClient class return an observable. 
+        createPost(input: HTMLInputElement) {
+            let post = { title: input.value };
+            input.value = '';
+
+            this.http.post(this.url, JSON.stringify(post))
+                .subscribe(response => {
+                    post['id'] = response.id;
+                    this.posts.unshift(post);
+                    // or could do 
+                    // this.posts.unshift.splice(0, 0, post);
+                });
+        }
+
+    
+    The return type of the post will return the newly created record/resource.
+
+    post.id = response.id;
+
+Updating Data 
+
+    <ul class="list-group">
+        <li *ngFor="let post of posts" class="list-group-item">
+            <button 
+                (click)="updatePost(post)"
+                class="btn btn-default btn-sm">Update</button>
+            {{ post.title }}
+        </li>
+    </ul>
+
+    then in component
+
+        So could either call the .put() or the .patch() method.
+
+        What is the difference?
+
+            Use patch to only update a few properties of an object.
+            So instead of sending a complete representation of an object to the server,
+            we send only the properties that should be modified.
+
+            this.http.patch(`${this.url}/${post.id}`, JSON.stringify({ isRead: true }))
+
+            Now for the put method. 
+            You send the entire post object. 
+
+             this.http.patch(`${this.url}/${post.id}`, JSON.stringify(post))
+
+             Usually most APIs respond to PUT request and PATCH is not widely supported.
+
+
+        updatePost(post) {
+            this.http.patch(`${this.url}/${post.id}`, JSON.stringify({ isRead: true }))
+                .subscribe(response => {
+                    console.log(response);
+                });
+        }
+
+Deleting Data 
+
+    <button (click)="deletePost(post)" class="btn btn-danger btn-sm">
+      Delete
+    </button>
+
+
+    then in component 
+
+        // No body, just the delete request and the ID 
+
+        deletePost(post) {
+            this.http.delete(this.url + '/' + post.id)
+                .subscribe(response => {
+                    const index = this.posts.indexOf(post);
+                    this.posts.splice(index, 1);
+                });
+        }
+
+OnInit Interface 
+
+    As a best practice, constructors should be very small and lightweight.
+
+    Should not perform expensive operations, like calling the server. 
+
+    Components in Angular have lifecycle hooks.
+
+    Special methods to add to component, Angular will call them automatically 
+    during the lifecycle of the component.
+
+        Lifecycle hooks 
+
+        When Angular 
+
+            * creates a component 
+            * renders it 
+            * creates and renders its children 
+            * destroys a component 
+
+        Angular calls specific methods if they are defined. 
+
+
+    import { Component, OnInit } from '@angular/core';
+
+    export class PostsComponent implements OnInit {
+
+        ngOnInit() {
+
+        }
+    }
+
+    There are multiple Lifecycle hooks 
+
+        OnInit()
+
+        OnChanges()
+        
+        DoCheck()
+
+        AfterContentInit 
+
+        ...
+
+        each of these interfaces, include a method with the same name and prefixed with ng 
+
+        Technically we don't need to explicitly write 
+
+        implements OnInit 
+        // but this does apply compile time checking and ensures that we have fulfilled that contract 
+
+    
+Separation of concerns 
+
+    There's a problem with the implementation.
+
+    It violates the separation of concerns.
+
+    Think of a restaruant.
+    It requires different roles. 
+
+    Our classes should have a single responsibility.
+
+    Making it easier to maintain and tests.
+
+    The problem is that our component is taking care of the presentation logic of the view 
+    and getting the data. 
+
+    In a larger and complex object, will likely need to reuse the service calls. 
+
+    Would need to update multiple places of your code. 
+
+    Also it's harder to unit tests as we don't want a live server up and running because 
+    we need to isolate the logic. 
+
+    Problems with the HTTP calls is that unit tests are brittle and slows down our automated tests.
+    We want to run thousands of automated tests in just a few seconds.
+
+    So the solution 
+
+        Create another class, called a service 
+
+
+        Component -> Service -> Backend 
+
+        Service class is purely responsible for communicating to the backend. 
+
+        Will now be isolated and reusable. 
+
+        When we unit tests, we can create a fake implementation.
+
+        Component -> FakeService 
+
+Extracting a service 
+
+    $ cd src/app 
+
+    $ mkdir services 
+
+
+    $ ng g s post 
+
+    // ng generate service 
+
+    This creates a .spec unit test file as well as a TypeScript file. 
+
+    Angular does not register the service as a provider in app.module.ts 
+
+    So when use it for dependnency injection, we have to explicitly do it 
+
+        in app.module.ts 
+
+        providers: [
+            PostService,
+            ...
+        ]
+
+    Move the url from posts.components.ts 
+
+    post.service.ts 
+
+        import { Injectable } from '@angular/core';
+        import { HttpClient } from '@angular/common/http';
+
+        @Injectable({
+            providedIn: 'root'
+        })
+        export class PostsService {
+            private url = 'http://jsonplaceholder.typicode.com/posts';
+
+            constructor(private http: HttpClient) { }
+
+            getPost() {
+                // So we are returning an Observable to the consumer of this service. 
+                this.http.get(this.url);
+            }
+        }
+
+    We should NOT inject the http class into the constructor 
+    of our components. 
+    Instead we should inject our services.
+
+        import { PostService } from '......';
+
+        ...
+
+        constructor(private service: PostService) { }
+
+        ngOnInit() {
+            this.service.getPost()
+                .subscribe(response => {
+                    this.posts = response;
+                });
+        }
+
+        Telling the service, go get the posts for me. 
+        It's up to the service to figure out. 
+
+        implementation details that don't affect the component 
+        since they are encapsulated in the service. 
+
+        That service is also reusable now.
+
+    => Separation of concerns. 
+
+handling errors 
+
+    We have assumed that the call to the server always succeeds.
+
+    But that is not always the case. 
+
+    .....
+
+handling unexpected errors 
+
+handling expected errors 
+
+throwing Application-specific errors 
+
+Code Review 
+
+Importing Observable Operators and Factory Methods 
+
+Global Error Handling 
+
+Extracting a reusable data service 
+
+The Map Operator 
+
+Optimistic vs Pessimistic Updates 
+
+Observables Vs. Promises 
+
+    Why Angular uses Observables instead of Promises?
+
+        /*
+        Observables are lazy (you need to explicitly subscribe to it)
+        Promises are eager (don't need to call .then())
+
+        Observables allow Reactive programming and have useful methods with RxJS 
+        that would be much more complex to implement with Promises.
+
+        Operators only come in affect, when we subscribe to it. 
+
+        so we can chain a bunch of operators, and later when we subscribe to the Observables,
+        all those operators come into affect.
+
+        Takeaway:
+            - you can always convert observables to promises
+            - prefer observables
+            - they allow reactive programming 
+            - they provide a bunch of useful operators 
+            - observables are lazy (nothing happens until you subscribe to them)
+
+        */
+
+
+        deletePost(post) {
+            this.service.delete(post.id);
+        }
+
+        // If you don't subscribe to the observable.
+
+        The network tab,
+        with Observables nothing happens until you subscribe to them. 
+
+        In order words, the service will not call the backend.
+
+        NEED 
+
+        deletePost(post) {
+            this.service.delete(post.id)
+                .subscribe();
+        }
+
+    One of the key differences.
+
+
+    Observables are lazy
+    Promises are eager 
+
+    As soon as you create a promise, the code is executed.
+
+    in data.service.ts 
+
+    Could always convert an Observable to promise if you want to.
+    // But prefer to work with Observables 
+
+        import 'rxjs/add/operator/toPromise';
+
+        ....
+
+        delete(id) {
+            return this.http.delete(this.url + '/' + id)
+                .map(response => response.json())
+                .toPromise()
+                .catch(this.handleError);
+        }
+
+
+    in posts.components.ts 
+
+        Promises don't have a subscribe method,
+        Only have .then() for getting the result 
+        and .catch() for handling errors 
+
+        deletePost(post) {
+            this.service.delete(post.id);
+        }
+
+    So promises are eager, we don't have to call the .then().
+
+    Observables are lazy.
+    Nothing happens until we subscribe to them, with .subscribe()
+
+    Answer has to deal with the operators of Observables.
+    We get really useful and really powerful operators with Observable, all packed in one method. 
+
+    They allow us to implement certain features will less code. 
+
+        => REACTIVE PROGRAMMING 
+
+        Reactive Extensions, which is the library where we get Observables and their operators.
+        These allow us to write code in Reactive Style.
+
+        We get some feature that would be far more complex the traditional way.
+
+    For example,
+
+
+    delete(id) {
+        return this.http.delete(this.url + '/' + id)
+            .map(response => response.json())
+            .retry(3)
+            .catch(this.handleError);
+    }
+
+    The operators that you use most of the time are .map() and .catch()
+
+
+
+
+Exercise 
+
+Solution 
