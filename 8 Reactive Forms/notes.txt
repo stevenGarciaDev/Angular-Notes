@@ -1,0 +1,177 @@
+Introduction 
+
+Building a Bootstrap form 
+
+creating controls programmatically 
+
+adding validation 
+
+specific validation errors 
+
+implementing custom validation 
+
+async operations 
+
+async validators 
+
+displaying a loader image 
+
+validating upon submitting the form 
+
+nested FormGroups 
+
+FormArray 
+
+FormBuilder 
+
+Quick Recap 
+
+Exercise - Change Password 
+
+Solution - Change Password 
+
+/* -----------------------
+
+Introduction 
+
+    Explicitly create our own FormControl objects.
+
+    Benefits 
+    * more control over form structure 
+    * more control over form behavior
+    * easier to unit tests 
+
+    To build dynamic forms where input fields are rendered based on data you get from the server,
+
+    In this section learn to 
+
+    - create controls programmatically
+    - add validation 
+    - implement custom validation 
+    - implement asynchronous validation 
+        // involving contacting the server 
+        // to validate a username for uniqueness for example 
+    - build forms that include an array of objects 
+
+
+Building a Bootstrap form 
+
+creating controls programmatically 
+
+    Note that all the directives for building Reactive forms are defined in 
+    ReactiveFormsModule,
+    That you need to explicitly import into the main module. 
+
+    in app.module.ts 
+
+        imports: [
+            .....,
+            ReactiveFormsModule
+        ]
+
+    <form>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input 
+                id="username"
+                type="text"
+                class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input 
+                id="password"
+                type="text"
+                class="form-control">
+        </div>
+        <button class="btn btn-primary" type="submit">Sign Up</button>
+    </form>
+
+    When building Reactive forms, we should create the FormControl objects in the code. 
+
+    NOTE: AbstractControl is the base class of FormControl and FormGroup 
+
+
+
+    signup-form.component.ts 
+
+        import { Component } from '@angular/core';
+        import { FormGroup, FormControl } from '@angular/forms';
+
+        @Component({
+            selector: 'signup-form'.
+            templateUrl: './signup-form.component.html',
+            styleUrls: ['./signup-form.component.css']
+        })
+        export class SignupFormComponent {
+            form = new FormGroup({
+                username: new FormControl(),
+                password: new FormControl()
+            });
+            // 1st arg are the objects that are part of the form 
+        }
+
+    Now in the template, associate the input groups with the FormControl objects. 
+
+    so apply the formGroup directive to the form and its underlying FormGroup instance,
+
+    then apply formControlName directive to an input field to its underlying FormControl instance 
+
+
+    --
+     <form [formGroup]="form">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input 
+                [formControlName]="username"
+                id="username"
+                type="text"
+                class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input 
+                [formControlName]="password"
+                id="password"
+                type="text"
+                class="form-control">
+        </div>
+        <button class="btn btn-primary" type="submit">Sign Up</button>
+    </form>
+
+adding validation 
+
+    With templaten driven forms 
+
+    We added validation using HTML5 attributes
+
+    <input 
+        required 
+        minlength=""
+        maxlength=""
+        pattern=""
+
+
+specific validation errors 
+
+implementing custom validation 
+
+async operations 
+
+async validators 
+
+displaying a loader image 
+
+validating upon submitting the form 
+
+nested FormGroups 
+
+FormArray 
+
+FormBuilder 
+
+Quick Recap 
+
+Exercise - Change Password 
+
+Solution - Change Password 

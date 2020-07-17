@@ -1,0 +1,190 @@
+Angular and ngrx
+
+ngrx and the Redux pattern is one of the most important changes of how you write front end applications. 
+
+It's another way to build Angular apps. 
+ngrx is a library you use with Angular.
+
+ngrx = redux pattern + Angular 
+
+    The Redux pattern is a state management container 
+    
+    Vue has Vuex 
+
+    Angular has ngrx 
+
+    React has Redux 
+
+Use NPM 
+
+Angular does it a little differently.
+
+Angular supercharges it 
+
+    ngrx supercharges the redux pattern with RxJS
+
+    redux pattern + Angular + RxJS 
+
+RxJS is Reactive Extentions for JavaScript 
+// a library that Angular uses heavily 
+
+ngrx is a redux pattern for Angular 
+
+RxJS helps with events and callbacks 
+
+What is the problem that it solves?
+
+    => 
+
+    needing extra state management on our front end 
+
+    A couple ways to manage state.
+
+    Managing state across a large scale applicaiton can be tricky as you have 
+    to keep things in sync. 
+
+    There are patterns to help you. 
+
+    Big pattern is to have this container
+
+        container component                 service A 
+
+
+        Has an injected service. 
+
+        Angular you have a component tree. 
+        A container component and a presentation component. 
+
+        @Input/@Output 
+
+        No logic in the presentation component 
+        // want to keep them as simple as possible 
+        // as to allow easy reuse 
+
+    When follow this best practice pattern, you'll add another presentation component 
+    and end up having to pass down the state multiple levels or events three levels 
+    so that the smart component can do the work. 
+
+    It's good but know that on three levels.
+
+    Angular service. 
+
+
+    as things start to grow, have more container components 
+
+    Components need multple services.
+
+    Lots of state can be changed at the same time. 
+    Everything has to listen for everything else, 
+    race conditions, who got in first, etc. 
+
+    Times by 10, and it gets complex.
+
+
+    => have a STORE 
+    a single source of truth 
+
+    Just one thing to supply the state for the application. 
+
+    The only place where you update. 
+
+    Put the state to an external service. (A single place)
+
+    The store is just a JavaScript object.
+    // a Singleton 
+
+Container components 
+
+
+    ----
+
+Store is just a JavaScript objec.t 
+
+    It contains values.
+
+Components can say, 
+give me a slice of the state that I need. 
+
+in normal Angular world, you talk to an Angular service and then perform the CRUD action, 
+
+We want the component to just select bits from the store and then dispatch actions. 
+
+That action is just an object. 
+// it has a type and a payload.
+
+So Who is listening to these actions that are being dispatched?
+
+    => the job of a reducer 
+
+    A reducer is a special function.
+    That takes an action and the state (slice)
+
+    and it will then make a new state 
+
+-
+The reducer function is a pure function.
+For the arg to pass into it, always return the EXACT same value out.
+
+Need to make an HTTP request.
+// that's a side effect 
+
+You don't want to perform that HTTP request in a reducer function. 
+
+Effects 
+    // how you handle that situation 
+
+    Store 
+
+    Component ask store for some state 
+    dispatch action to the reducer 
+
+        Effect listens for all actions that are dispatched in your application.
+
+        If it captures one it's interested in, it can perform things 
+
+    The Effects has an injected Service 
+    // it will communicate with the service and if the HTTP is successfully 
+    then it will dispatch an event that it successfully completed 
+    otherwise will dispatch action that it failed 
+
+    moving CRUD to the Effect 
+
+    Most CRUD operations, cause a side effect
+    // rather than straight to the reducer, you go to the Effects first. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

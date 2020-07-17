@@ -1,0 +1,423 @@
+Introduction 
+
+Routing in a Nutshell 
+
+Configuring Routes 
+
+RouterOutlet 
+
+RouterLink 
+
+RouterLinkActive
+
+Accessing Route Parameters 
+
+Why Route Parameters are Observables 
+
+Routes with Multiple Parameters 
+
+query Parameters
+
+subscribing to multiple Observables
+
+the SwitchMap Operator 
+
+programmatic navigation 
+
+exercise - blog archives 
+
+solution 
+
+/* ------------------------
+
+Introduction 
+
+    * configuring routes 
+    * implementing single page applications 
+    * working with route and query parameters 
+    *programmatic navigation
+
+Routing in a Nutshell 
+
+    Modules 
+
+    forms 
+
+    reactiveForms 
+
+    http 
+
+    now 
+
+    Router module 
+
+    We have directives and services for implementing navigation in our applications.
+
+    3 Steps to implement navigation
+
+    1) configure the routes 
+
+        Each route determines what component should be visible 
+        when user navigates to a certain url.
+
+        So a route is the mapping of a path to a component. 
+
+    2) Add a router outlet 
+
+        Display the corresponding component when a given route becomes active 
+
+    3) Add links 
+
+Configuring Routes 
+
+    app.module.ts 
+
+    $ npm install 
+
+    $ ng serve 
+
+    declarations are components 
+
+    import { RouterModule } from '@angular/router';
+
+    imports: [
+        .....,
+        RouterModule.forRoot([
+            { 
+                path: '', 
+                component: HomeComponent 
+            },
+            { 
+                path: 'followers', 
+                component: GithubFollowersComponent 
+            },
+            { 
+                path: 'profile/:username', 
+                component: GithubProfileComponent 
+            },
+            { 
+                path: 'posts', 
+                component: PostsComopnent 
+            },
+            { 
+                path: '**', 
+                component: NotFoundComponent  
+            }      
+        ])
+    ]
+
+    // Each route is an object with 2 properties 
+    // path and component 
+
+    :username is a url parameter 
+    // it will be placed dynamically at runtime 
+
+    ** represents a wildcart to catch any url in the browser address bar 
+
+    Note that the order of the routes are important.
+
+
+
+    .forRoot() is a static method defined in the router module class. 
+
+    We use this to define the root routes for our application. 
+
+    As the application grows we would like to break that into smaller more 
+    manageable modules.
+
+    Then in each module you would have a set of routes for that area of the application.
+
+    Then instead of using forRoot()
+    you would use 
+
+    .forChild()
+
+    
+RouterOutlet 
+
+    Then in the browser, will see error 
+
+    in console,
+
+    Cannot find primary outlet to load home component
+
+    So we have to add a router outlet.
+
+    That is where Router Module will display the component that 
+    is associated with the current route.
+
+    app.component.html 
+
+    <navbar></navbar>
+    <router-outlet></router-outlet>
+
+
+    So router-outlet is a directive defined in the router module. 
+    When Angular sees this, it's going to render the component associated 
+    with the current router after this router outlet.
+    // not inside
+
+RouterLink 
+
+    navbar.component.html 
+
+    In Angular applications, we don't use the href attribute.
+
+    For example,
+
+        href="/followers"
+
+        When use href attribute, 
+
+    When click on links, the page will flicker a bit,
+    go blank for a second. 
+
+    With this navigation, every time we click on a link,
+    the entire page is downloaded and the Angular app is reinitialized 
+
+    As your application grows, the cost of startup is going to be higher.
+
+    So that delay will be even more 
+
+    Network tab,
+    all the resources are redownloaded
+
+    // avoid at all costs, redownloading stuff 
+    // as in that case there's no point in using Angular 
+
+    When we click on a link, we want only the content for the 
+    new page to be downloaded. 
+
+    Not the entire application.
+
+
+    So instead use a directive called RouterLink.
+
+    <li><a routerLink="/posts">Posts</a></li>
+
+    The directive routerLink is also defined in the router module. 
+
+    So now the page won't go blank, components that don't change will remain 
+
+    and only the content area will be reloaded.
+
+    Network tab/
+
+    Can only see the request for the content of the new page. 
+
+    no JS bundles redownloaded.
+
+    Can filter for JS 
+    and CSS 
+
+    // there are not files for them 
+
+    since they were downloaded the first time
+
+    Single Page Applications (SPA)
+    // a single page is  downloaded from the server 
+
+    And as the user navigates from one page to another,
+    only the content for the target page is downloaded
+
+
+    <ul class="nav navbar-nav">
+        <!-- a dynamic URL -->
+
+        when dealing with route parameters, instead of routerLink,
+        use property binding syntax 
+        bind it to an expression rather than to a string 
+
+        1st element is the path,
+        then all the route parameters 
+
+        <a [routerLink]="['/followers', followers.id]">{{ follower.login }}</a>
+
+    </ul>
+
+    The url 
+
+
+    To recap 
+    for simple routes you can use the routerLink directive as an attribute and set it as a string value 
+
+    <a routerLink="/followers">
+
+    If dealing with route parameters, 
+    you should use the property binding syntax and set the value to an array 
+        1st element is the path,
+        subsequent elements are route arguments 
+
+    <a [routerLink]="['/followers', followers.id]">
+
+RouterLinkActive
+
+    Apply dynamically 
+
+    have routerLinkActive directive 
+
+    <li routerLinkActive="active current"><a routerLink="/followers">
+
+
+    So include a string, for a list of css classes that should be applied 
+    when this link is active 
+
+    So we use that directive to apply classes 
+
+Accessing Route Parameters 
+
+    How to extract parameter in our components?
+
+    Most often get parameter and use a service to get data 
+
+    path: 'followers/:userId'
+
+
+    -
+
+    In order to get access to route paramters, 
+    we need to inject the ActivatedRoute class in our constructor 
+
+    // part of router module imported 
+    import { ActivatedRoute } from '@angular/core';
+
+    export class GithubProfileComponent implements OnInit {
+        constructor(private route: ActivatedRoute) { }
+
+        ngOnInit() {
+            // the property for all the parameters in this route ,
+            // it's an Observable<ParamMap>
+            this.route.paramMap
+                .subscribe(params => {
+                    console.log(params);
+                    let id = +params.get('userId');
+
+                    // most likely send to a service to get the profile 
+                    // service.getProfile(id);
+
+                    console.log(`Id is ${id}`);
+                });
+        }
+    }
+
+    so params map object 
+
+        keys 
+            // username in this case 
+            // the name of parameter 
+
+        params 
+            username: "45252"
+
+            // here we have key value pairs 
+
+    So the methods provided by paramsMap is 
+
+        .get()
+        .getAll()
+        .has()
+        .keys()
+
+    Use get() to get the value of a route parameter 
+
+    .getAll() to get the value of all route parameters 
+
+    .has() to see if we have a parameter by a given name 
+    in this object 
+
+
+    Observables have a method, subscribe()
+    subscribe and get values emitted 
+
+    
+    NOTE: to convert a string to a number 
+    put a + sign in front of a string 
+    which will convert it to a number 
+
+
+Why Route Parameters are Observables 
+
+    Consider what happens to our components, during navigation. 
+
+    User is on a page with Component A 
+
+    then click to display Component B 
+
+
+    Angular will destroy component A remove from DOM,
+    then create Component B and render its template in the DOM 
+
+    Component lifecycle hooks 
+        * OnInit
+        * OnDestroy 
+
+        // notified 
+        // add methods in your components 
+
+    -
+
+    Imagine have a link that allows user to navigate away from page and onto the same page 
+    // reuse same instance of component for views that utilize the same view/component 
+
+    
+    Same comopnent instance but different route parameters,
+    Angular will not destory the component,
+    it'll keep it in the DOM 
+
+    that's why route parameters are defined as Observables 
+
+    -
+    An Observable is technically a collection of asynchronous data 
+    that arrives over time. 
+
+    Subscribe to an Observable to get the response from the server. 
+
+    Can use them to model streams of asynchronous data.
+
+    Data comes into the stream, and anyone who is subscribed to this Observable 
+    will be notified.
+
+    -
+    Anytime new data in the collection, Observer will be notified. 
+    // like being subscribed to a blog 
+
+    so paramsMap is a collection of route parameters that can change over time,
+    so anytime there is a new route parameter 
+    we will be notified 
+
+    -
+
+    so not navigating away from component, but route parameters change 
+    so only 1 ngOnInit() will be invoked 
+    -
+
+    So if you have an application with this kind of navigation build into it,
+    because ngOnInit is called only once,
+    in order to get access to route parameters,
+    you have to subscribe to the routeMap Observable 
+
+    If 100% sure that the user will be navigating to a different page and component,
+    instead of subscribing to an Observable,
+
+    can instead use a snapshot 
+
+    ngOnInit() {
+        let id = this.route.snapshot.paramMap.get('id');
+
+        // the actual paramMap object and not an Observable
+    }
+
+Routes with Multiple Parameters 
+
+query Parameters
+
+subscribing to multiple Observables
+
+the SwitchMap Operator 
+
+programmatic navigation 
+
+exercise - blog archives 
+
+solution 
+

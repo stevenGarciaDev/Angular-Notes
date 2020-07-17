@@ -373,7 +373,7 @@ Dependency Injection
         // rather than internally with the new keyword.     
 
         def: 
-            Providing the dependnencies of a class into constructors.
+            Providing the dependencies of a class into constructors.
 
         Angular has a dependency injection framework built into it. 
 

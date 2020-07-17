@@ -1,0 +1,53 @@
+Introduction 
+
+What is Automated Testing 
+
+Types of Tests 
+
+Unit Testing Fundamentals 
+
+Working with Strings and Arrays 
+
+Setup and Tear down 
+
+Working with Forms 
+
+Working with Event Emitters 
+
+Working with Spies 
+
+Interaction testing 
+
+Working with Confirmation Boxes 
+
+Limitations of Unit Tests 
+
+Code Coverage 
+
+/* ----------------------
+
+Introduction 
+
+What is Automated Testing 
+
+Types of Tests 
+
+Unit Testing Fundamentals 
+
+Working with Strings and Arrays 
+
+Setup and Tear down 
+
+Working with Forms 
+
+Working with Event Emitters 
+
+Working with Spies 
+
+Interaction testing 
+
+Working with Confirmation Boxes 
+
+Limitations of Unit Tests 
+
+Code Coverage 

@@ -18,6 +18,8 @@ Styles
 
 View Encapsulation 
 
+ngContent 
+
 ngContainer 
 
 Exercise - LikeComponent 
@@ -357,7 +359,7 @@ View Encapsulation
     => Allows us to apply scoped styles to elements without bleeding out 
         to the outer world. 
 
-    // NOT all browsers support this 
+    // NOT all browsers support this!
 
     Ex:
 
@@ -368,7 +370,205 @@ View Encapsulation
             <h1>Hello</h1>
         `;
 
+    Vanilla JavaScript above  
+
+    We use the document to get a reference to an element in our HTML document.
+
+    Then can use the innerHTML property to set its value.
+
+    The problem is that the style leaks outside of the element. 
+
+    You want your styles for your component to be only applied for that particular 
+    component. 
+
+    You don't want it to override. 
+
+    With just one extra line of code we can use the concept of shadow DOM.
+
+        Ex:
+
+        var el = document.querySelector('favorite');
+        var rot = el.createShadowRoot();
+
+        root.innerHTML = `
+            <style>h1 { color: red }</style>
+            <h1>Hello</h1>
+        `;
+
+    That's all, now the style is just scoped to that element.
+
+
+    What does it have to do with Angular?
+
+        -> We have view encapsulation.
+
+    
+    import { Component, ViewEncapsulation } from '@angular/core';
+
+    // so in our metadata we add ViewEncapsulation which is an enum 
+
+        Emuldated is the default 
+            // for the most part, 
+
+            Angular emulates shadow DOM,
+            since most browsers don't support it,
+
+            it has its own trick to apply its own scope 
+
+        Native 
+
+        None
+
+    @Component({
+        selector: 'favorite',
+        templateUrl: '',
+        styleUrls: [''],
+        encapsulation: ViewEncapsulation.Emulated
+    })
+
+
+    Angular attaches 
+
+    for example 
+
+        <style>.glyphicon[_ngcontent-c1] {
+            color: red;
+        }</style> == $0
+
+
+    SO 
+
+    The attribute is applied to the element. 
+
+    It attaches an attribute to the elements and uses that attribute to 
+    post process our CSS.
+
+    Which will be applied only to those elements with that specific attribute. :)
+
+
+
+    ViewEncapsulation.Native 
+
+        Angular will use the native shadow DOM in the browser 
+        rather than Angular doing it.
+
+        Won't work in most browsers.
+        Only in modern Chrome and Safarii at time of video.
+
+        Under will see 
+
+        #shadow-root (open)
+
+        In settings of chrome 
+
+            Preferences 
+            Elements 
+                checkbox show user agent shadow DOM 
+
+
+    ViewEncapsulation.None 
+
+        styles will leak outside the template. 
+
+        Avoid! 
+
+    The default View Encapsulation is ViewEncapsulation.Emulated 
+    and it works by attaching unique attributes for our CSS rules. 
+    99% of time you don't modify it. 
+
+    
+ngContent
+
+    import { Component } from '@angular/core';
+
+    @Component({
+        selector: 'bootstrap-panel',
+        templateUrls: './panel.component.html',
+        styleUrls: ['./panel.component.css']
+    })
+    export class PanelComponent {
+        constructor() { }
+    }
+
+    For reusable components, you should prefix the selector to avoid name clashes.
+
+    in the html 
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Heading</div>
+            <div class="panel-body">{{ body }}</div>
+        </div>
+
+    --
+    SO now in app.component.html where we will actually be using the component via its selector 
+
+    // could use property binding 
+
+    <bootstrap-panel [body]="body"></bootstrap-panel>
+
+    // but syntax is quite weird,
+    // how about markup right here 
+
+    // instead of using property binding with input properties
+    // use the ngContent element 
+
+
+    in Panel,
+    add two injection points so the consumer can provide content into those injection points. 
+
+    So <ng-content> is a custom element defined in Angular. 
+    Need to distinguish them with an identifier,
+    With a CSS selector
+
+    Ng content will be replaced with that element. 
+    
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <ng-content select=".heading"></ng-content>
+        </div>
+        <div class="panel-body">
+            <ng-content select=".body"></ng-content>
+        </div>
+    </div>
+
+    --
+    back in app.component.html 
+
+    <bootstrap-panel>
+        <div class="heading">Heading</div>
+        <div class="body">
+            <h2>Body</h2>
+            <p>Some content here ...</p>
+        </div>
+    </bootstrap-panel>
+
+
+    So to build reusable components where you want the consumer of the component 
+    to be able to provide custom content, use the ngContent element. 
+
+    NOTE: You don't need a selector if you only have one ng-content element. 
+
 ngContainer 
+
+    Sometimes don't want an additional div that's extra noise in the markup. 
+
+
+    back in the app.component.html 
+
+        So ng-container is a custom element in Angular,
+        at runtime, it'll take only the content of the ng-container,
+        it won't actually render it in the DOM. 
+
+        // it's not going to be a <div> or something else. 
+
+    <bootstrap-panel>
+        <ng-container class="heading">Heading</ng-container>
+        <div class="body">
+            <h2>Body</h2>
+            <p>Some content here ...</p>
+        </div>
+    </bootstrap-panel>
 
 Exercise - LikeComponent 
 

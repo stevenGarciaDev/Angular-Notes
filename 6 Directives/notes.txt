@@ -1,0 +1,919 @@
+Introduction 
+
+ngIf 
+
+Hidden Property 
+
+ngSwitchCase 
+
+ngFor 
+
+ngFor and Change detection 
+
+ngFor and TrackBy 
+
+the leading asterisk 
+
+ngClass 
+
+ngStyle 
+
+safe traversal operator 
+
+creating custom directives 
+
+exercise - zippy 
+
+solution = zippy 
+
+/* -----------------
+
+
+Introduction 
+
+ngIf 
+
+    There are times when you may want to show parts of a page depending 
+    on some condition. 
+
+    import { Component } from '@angular/core';
+
+    @Component({
+
+    })
+    export class AppComponent {
+        courses = [1, 2];
+        // In the real world, you would display course objects. 
+
+
+
+    }
+
+    app.component.html 
+
+        NOTE: We use directives to modify the DOM. 
+
+        There are two types of directives. 
+
+        Structural directives => Modify the structure of the DOM 
+
+        Attribute directives => Modify the attributes of DOM elements 
+
+    // So this is a structural directive,
+    // Need to prefix with an asterisk.
+
+    In JavaScript/TypeScript as long as the condition renders as truthy, it'll be rendered in the DOM. 
+
+    // this is the OLD approach 
+    <div *ngIf="doWeHaveAnyCourses()">
+        List of courses 
+    </div> 
+    <div *ngIf="courses.length === 0">
+        No courses yet
+    </div>
+
+    --
+    In Angular 4 we have a new syntax to implement using an if and else kind of approach. 
+
+    Change to ng-template and assign it an identifier. 
+
+        Can use a # to define a template variable. 
+
+        So for the else we reference our template variable.
+
+    <div *ngIf="doWeHaveAnyCourses(); else noCourses">
+        List of courses
+    </div>
+    <ng-template #noCourses>
+        No courses yet 
+    </ng-template>
+
+    So the correct block will be rendered based on the condition. 
+
+    The syntax is kind of weird, and it seems inconsistent.
+
+    There's another approach.
+
+
+    <div *ngIf="doWeHaveAnyCourses(); then coursesList else noCourses"></div>
+    <ng-template #coursesList>
+        List of courses 
+    </ng-template>
+    <ng-template #noCourses>
+        No courses yet 
+    </ng-template>
+
+    This syntax is better.
+
+    There's another approach in the next video.
+
+Hidden Property 
+
+    Instead of ngIf directive we can use the hidden attribute to hide them. 
+
+    such as 
+
+    <div hidden>
+        Courses 
+    </div> 
+
+    hidden also exists as a property in our DOM objects. 
+
+    So we can use property binding to that hidden 
+
+    <div [hidden]="courses.length == 0">
+        List of courses
+    </div>
+    <div [hidden]="courses.length > 0">
+        No courses yet 
+    </div> 
+
+    Inspect the elemtn 
+
+    both exists in our DOM, 
+    but the first has the hidden attribute 
+
+    So that's the main diference between ngIf and the hidden property 
+
+    with ngIf
+    if the condition is false, 
+    then that element is removed from the DOM 
+
+    which is better??
+
+        If you are working with a large tree with a lot of children. 
+
+        *ngIf 
+
+        => FOR large element trees 
+
+        Because the elements can take substantial memory and computing resources. 
+
+        You don't want to put them in the DOM if you are not going to show them to the user.
+
+        Plus Angular may continue to check for changes even to hidden/invisible properties 
+        // the change detection mechanism in Angular which keeps your views 
+        // in sync with your components in the background 
+
+        // change tracking on elements that are in the DOM. 
+
+    Better for ngIf to free up resources 
+
+    There are some situations, building a large element tree in the right state may be costly.
+
+    So if you have a substantial subtree,
+    having ngIf may have a negative impact on the performance of that page. 
+
+    If the user is going to toggle to show or hide, 
+    if building that element tree is costly you shouldn't use 
+    ngIf, it's better to keep it in the DOM and hide it using 
+    the hidden attribute. 
+
+
+    [hidden]    
+        => FOR small element trees 
+
+
+ngSwitchCase 
+
+    Another directive which is similar to switch in programming languages. 
+
+    To implement with ngSwitchCase, you could do the same for ngIf 
+    but ngIf is for a truthy and or falsy condition 
+
+    In this case, we might have multiple 
+
+
+    in app.component.html 
+
+        ul.nav.nav-pills 
+        // known as zen coding to quickly generate HTML markup
+
+            (li>a)*2
+
+        .......
+
+        <ul class="nav nav-pills">
+            <li class="active"><a href="">Map View</a></li>
+            <li class=""><a href="">List View</a></li>
+        </ul>
+        <div>
+            <div>Map View Content</div>
+            <div>List View Content</div>
+        </div>
+
+    --
+    So now in our app.component.ts 
+
+    export class AppComponent {
+        // Define a field to keep track of the currently selected tab 
+        viewMode = 'map'; // can hold map or list 
+    }
+
+    --
+
+    So we want to render it dynamically based on the viewModel field. 
+
+    --
+    We we use property binding with ngSwitch 
+    and bind it to a field in our class. 
+    It's a structural directive. 
+
+    NOTE: it's a string and wrapped in ''
+
+    Also use class binding.
+
+    Also use event binding to bind the click event to toggle the viewMode.
+    Or could just write the expression here if it's a one liner. 
+
+
+
+       <ul class="nav nav-pills">
+            <li [class.active]="viewMode == 'map'"><a (click)="viewMode = 'map'">Map View</a></li>
+            <li [class.active]="viewModel == 'list'"><a (click)="viewMode = 'list'">List View</a></li>
+        </ul>
+        <div [ngSwitch]="viewMode>
+            <div *ngSwitchCase="'map'">Map View Content</div>
+            <div *ngSwitchCase="'list'">List View Content</div>
+            <div *ngSwitchDefault>Otherwise</div>
+        </div>
+
+    
+    To compare the value of a field or property against multiple values 
+    use the ngSwitchCase directive. 
+
+ngFor 
+
+    Use it to render a list of objects. 
+
+    More details .
+
+    export class AppComponent {
+        courses = [
+            { id: 1, name: 'course 1' },
+            { id: 2, name: 'course 2' },
+            { id: 3, name: 'course 3' }
+        ]
+    }
+
+    --
+
+    now in app.component.html 
+
+    ul>li 
+
+
+    <ul>
+        <li *ngFor="let course of courses">
+            {{ course.name }}
+        </li>
+    </ul>
+
+    --
+
+    So the ngFor directive exports a bunch of values to help you build certain featuers.
+
+    Example, imagine you want to render a table and want to highlight the first, or last row,
+    or odd or even rows. 
+    Or maybe display an index next to each object.
+
+    You can use the exported values.
+
+        // One of these exported values is index which you alias to a local variable 
+
+
+
+    <ul>
+        <li *ngFor="let course of courses; index as i">
+            {{ i }} - {{ course.name }}
+        </li>
+    </ul>
+
+
+    ---
+    There are several others. 
+
+    angular.io 
+
+        search for 
+
+        ngForOf 
+
+        // in HTLM we we ngFor 
+        the actual name of the directive is ngForOf 
+
+        Scroll down to local variables. 
+
+        index, 
+        first, 
+        last, 
+        even,
+        odd 
+
+    For a table highlighting the event rows 
+
+     <ul>
+        <li *ngFor="let course of courses; even as isEven">
+            {{ course.name }} <span *ngIf="isEven">(EVEN)</span>
+        </li>
+    </ul>
+
+    // Instead could apply some class for the even rows of your table. 
+
+ngFor and Change detection 
+
+    How this ngFor directive responds to changes in the component state. 
+
+    <button (click)="onAdd()">Add</button>
+    <ul>
+        <li *ngFor="let course of courses">
+            {{ course.name }}
+        </li>
+    </ul>
+
+    ----
+
+    export class AppComponent {
+        courses = [
+            { id: 1, name: 'course 1' },
+            { id: 2, name: 'course 2' },
+            { id: 3, name: 'course 3' }
+        ]
+
+        onAdd() {
+            this.courses.push({ id: 4, name: 'course4 '});
+        }
+    }
+
+    So 
+    Angular has this change detection mechanism 
+
+        DOM events 
+
+        AJAX Requests   => => Change Detection 
+
+        Timers 
+
+
+    So whenever you click a button, AJAX Requests, etc. 
+
+    Anuglar performs its change detection.
+
+    It looks at our component, it knows that the courses field has a new object,
+
+    then it will render that course using that template. 
+
+    You can also add a button next to each course to remove it. 
+
+
+    --
+    <button (click)="onAdd()">Add</button>
+    <ul>
+        <li *ngFor="let course of courses">
+            {{ course.name }}
+            <button (click)="onRemove(course)>Remove</button>
+        </li>
+    </ul>
+
+    ---
+     export class AppComponent {
+        courses = [
+            { id: 1, name: 'course 1' },
+            { id: 2, name: 'course 2' },
+            { id: 3, name: 'course 3' }
+        ]
+
+        onAdd() {
+            this.courses.push({ id: 4, name: 'course4 '});
+        }
+
+        onRemove(course) {
+            const index = this.courses.indexOf(course);
+            this.courses.splice(index, 1);
+        }
+    }
+
+    Similarly, if we modify an existing object,
+    Angular will update the DOM 
+
+    --
+    <button (click)="onAdd()">Add</button>
+    <ul>
+        <li *ngFor="let course of courses">
+            {{ course.name }}
+            <button (click)="onChange(course)>Change</button>
+        </li>
+    </ul>
+
+
+    --
+    export class AppComponent {
+        courses = [
+            { id: 1, name: 'course 1' },
+            { id: 2, name: 'course 2' },
+            { id: 3, name: 'course 3' }
+        ]
+
+        onAdd() {
+            this.courses.push({ id: 4, name: 'course4 '});
+        }
+
+        onChange(course) {
+            course.name = 'UPDATED';
+        }
+    }
+
+    so this is change detection 
+
+ngFor and TrackBy 
+
+    change detection from a performance point of view 
+
+
+    Simulate us getting the courses from the sesrver. 
+
+
+
+    export class AppComponent {
+        courses;
+
+        loadCourses() {
+            this.courses = [
+                { id: 1, name: 'course 1' },
+                { id: 2, name: 'course 2' },
+                { id: 3, name: 'course 3' }
+            ];
+        }
+    }
+
+    ---
+
+    <button (click)="loadCourses()">Load courses</button>
+    <ul>
+        <li *ngFor="let course of courses">
+            {{ course.name }}
+            <button (click)="onChange(course)>Change</button>
+        </li>
+    </ul>
+
+    --
+
+    Open chrome developer tols.
+
+    A purple highlight on elements tab.
+    This means that Angular is reconstructing those elements.
+
+    If working with a large list or complex markup.
+
+    Angular will reconstruct the entire DOM object tree. 
+
+    This can be costly if dealing with a large complex list. 
+
+    To optimize this.
+
+    Angular by default, tracks objects by their identity. 
+
+    Three references in memory for our courses field, 
+
+    even though we are dealing with the exact same content (in terms of the objects)
+
+    Their instantiattion in memory is unique so Angular sees it as new content.
+
+    So this is why it reconstructs the DOM tree. 
+
+
+    ---
+    In the ngFor directive, we have the ability to change how Angular tracks objects. 
+
+    By default, it tracks based on the object id in memory.
+
+    Example:
+
+        memory location: 100 
+        {
+            id: 1,
+            name: 'course1'
+        }
+
+        then 
+
+        memory location: 200 
+        {
+            id: 1,
+            name: 'course1'
+        }
+
+    --
+    Instruct Angular to use a different mechanism to track objects. 
+
+    TrackBy 
+        course.id 
+
+        // by their id instead of memory location  
+
+    So if download the exact same course from the server, 
+    none of their properties are changed. 
+
+    Angular will not rerender that DOM element. 
+
+        NOTE: with trackBy we are not calling it,
+        rather just passing it as a reference 
+
+    <button (click)="loadCourses()">Load courses</button>
+    <ul>
+        <li *ngFor="let course of courses; trackBy: trackCourse">
+            {{ course.name }}
+            <button (click)="onChange(course)>Change</button>
+        </li>
+    </ul>
+
+    -
+
+    in app.component.ts  
+
+    export class AppComponent {
+        courses;
+
+        loadCourses() {
+            this.courses = [
+                { id: 1, name: 'course 1' },
+                { id: 2, name: 'course 2' },
+                { id: 3, name: 'course 3' }
+            ];
+        }
+
+        trackCourse(index, course) {
+            course ? course.id : undefined;
+        }
+    }
+
+    So if you are dealing with a simple list, don't worry about the trackBy feature.   
+    // not needed as Angular performs well out of the box 
+
+    However, if you are dealling with a large list with complex markup and you do observe 
+    performance problems on a given page. 
+
+    You can try using trackBy to improve the performance. 
+
+    // don't use it by default in every page because it's more code and you won't 
+    // get any performance benefits 
+    // USE it only when you need to 
+
+the leading asterisk 
+
+    What is the leading asterisks with direcives?
+
+        consider:
+
+        <div *ngIf="course.length > 0; else noCourses">
+            List of courses 
+        </div>
+        <ng-template>
+            No courses 
+        </ng-template>
+
+
+    You are telling Angular to rewrite this block using an 
+    ng-template element. 
+
+    So when Angular sees that * 
+
+    it'll rewrite our DIV as ..
+
+        <div *ngIf="course.length > 0; else noCourses">
+            List of courses 
+        </div>
+        <ng-template [ngIf]="courses.length > 0>
+            <div>
+                List of courses
+            </div>
+        </ng-template>
+        <ng-template [ngIf]="!(courss.length > 0)">
+            No courses 
+        </ng-template>
+
+    So NOTE:
+
+        It creates an underlying ng-template element with the content inside and 
+        utilize property binding with ngIf, 
+        as well as apply the not operator to the conditional expression 
+        for the else block 
+
+    So 
+
+    *ngIf for our structural directives are syntactic sugar telling Angular to write th 
+    conditional blocks for us.
+
+    Makes our code cleaner and let Angular do the work for us. 
+
+
+ngClass 
+
+    So instead of 
+
+    <span
+        class="glyphicon"
+        [class.glyphicon-star]="isSelected"
+        [class.glyphicon-star-empty]="!isSelected'
+        (click)="onClick()"
+    ></span>
+
+    So this approach works but there is another way to deal with multiple classes 
+    which is a bit cleaner. 
+
+    Use the ngClass directive.
+
+    Each key in the objet passed represents a CSS class. 
+
+        <span
+            class="glyphicon"
+            [ngClass]="{
+                'glyphicon-star': isSelected,
+                'glyphicon-star-empty': !isSelected
+            }"
+            (click)="onClick()"
+        ></span>
+
+    So we don't have to repeat class binding twice. 
+
+    So ngClass is an example of an attribute directive.
+    We use it to modify attributes on existing DOM elements. 
+
+ngStyle 
+
+    app.component.ts 
+
+        <button 
+            [style.backgroundColor]="canSave ? 'blue': 'gray'"
+            [style.color]="canSave ? 'white': 'black'"
+            [style.fontWeight]="canSave ? 'bold': 'normal'"
+        >
+        Save 
+        </button> 
+
+        So we have three style bindings. 
+
+    So the template is noisy.
+    We have an attribute directive, ngStyle 
+    so if you are dealing with multiple style bindings and not using a class, 
+    you can clean it up using the ngStyle directive 
+
+    <button 
+        [ngStyle]="{
+            'backgroundColor': canSve ? 'blue': 'gray',
+            'color': canSave ? 'white': 'black'
+        }"
+    >
+    Save 
+    </button> 
+
+    INSTEAD use a CSS class 
+    which utilizes encapuslation 
+
+safe traversal operator 
+
+    export clsas AppComponent {
+        task = {
+            title: 'Review applications',
+            assignee: {
+                name: 'John Smith'
+            }
+        }
+    }
+
+    --
+    in app.component.html 
+
+    <span>{{ task.assignee.name }}</span>
+
+    -
+
+    Sometimes when you are dealing with complex objects, it is 
+    possible that the value of a property may be null or undefined 
+    for a certain period of time. 
+
+    For example, to call different endpoints to get the data 
+    from a server. 
+
+    May be null for a fraction of a second. 
+
+    The browser will have a blank screen.
+
+    In developer console, 
+    may get error 
+
+        Error TypeError: Cannot read property 'name' of null 
+
+    
+    One way is to use the ngIf directive. 
+
+    Render only if the task object has an assignee.
+    If it evaluates to truthy then it'll be rendered. 
+
+        <span *ngIf="task.assignee">{{ task.assignee.name }}</span>
+
+    Now no errors on the console.
+
+
+    There's another way to solve the problem.
+
+    Maybe you want to keep the span in the DOM but just don't want to render 
+    if it's null.
+
+    So can us 
+
+        Safe traversal operator.
+
+        <span>{{ task.assignee?.name }}</span>
+
+        If assignee is null or undefined, Angular will ignore this.
+        Otherwise it'll render. 
+
+    You may want to use this when dealing with complex objects. 
+
+creating custom directives 
+
+    There are times when you want to have control over the behavior of DOM elements. 
+
+    For example,
+    an input field where you type the name and press tab.
+    
+    for example a phone number, when they press enter, you format it. 
+
+    So as the user types, you may want to reformat it. 
+
+    You use directives. 
+
+    -
+
+    Can create a directive from scratch or use Angular CLI to generate a directive with 
+    some boiler plate code. 
+
+
+    $ ng g d input-format 
+
+    // ng generate directive 
+
+    Creates a directive file, a unit test file, and modifies app.module.ts 
+
+        input-format.directive.spec.ts 
+        input-format.directive.ts 
+        
+        update app.module.ts 
+
+    In app module 
+
+    in declarations inside of @NgModuel 
+    where we register all the components, all the pipes, and all the directives 
+    that are part of this module. 
+
+    otherwise will get a runtime error. 
+
+    Square brackets as the selector signifies a 
+
+    prefix your directives so that they don't class with built in or 3rd party libraries. 
+
+    HostListener allows us to subscribe to listen to the DOM element 
+    that has this attribute. 
+
+
+    import { Directive, HostListener, ElementRef, Input } from '@angular/core';
+
+    @Directive({
+        selector: '[appInputFormat]'
+    })
+    export class InputFormatDirective {
+        @Input('appInputFormat') format;
+
+        @HostListener('focus') onFocus() {
+            console.log("on focus");
+        }
+
+        @HostListener('blur') onBlur() {
+            let value: string = this.el.nativeElement.value;
+
+            if (this.format == 'lowercase')
+                this.el.nativeElement.value = value.toLowerCase();
+            else 
+                this.el.nativeElement.value = value.toUpperCase();
+        }
+
+        constructor(private el: ElementRef) {
+
+         }
+    }
+
+    -------
+
+    // if the field was named, format 
+    <input type="text" appInputFormat [format]="'uppercase'">
+
+    could instead do 
+
+
+    <input type="text" [appInputFormat]="'uppercase'">
+
+    --
+
+    If you have just one property then can use the syntax shown above.
+
+exercise - zippy 
+
+    The API for the component.
+
+    <zippy title="Shopping Details">
+        Shipping Details Content 
+    </zippy>
+    <zippy title="Billing Details">
+        Billing Details Content 
+    </zippy>
+
+    So put the content within. 
+
+solution = zippy 
+
+    $ ng g c zippy 
+
+    Implement in a step by step process. 
+    Just go one at a time. 
+
+    First define the component's API. 
+
+    // how it'll be used 
+
+    in app.component.html 
+
+    <zippy title="Shopping Details">
+        Shipping Details Content 
+    </zippy>
+    <zippy title="Billing Details">
+        Billing Details Content 
+    </zippy>
+
+    in zippy.component.ts 
+
+    import { Component } from '@angular/core';
+
+    @Component({
+        selector: 'zippy',
+        templateUrl: './zippy.component.html',
+        styleUrls; ['./zippy.component.css']
+    })
+    export class ZippyComponent {
+        @Input('title') title: string; 
+        isExpanded: boolean = true;
+
+        toggle() {
+            this.isExpanded = !this.isExpanded;
+        }
+
+        
+    }
+
+    ---
+
+    <div class="zippy>
+        <div 
+            class="zippy-heading"
+            [class.expanded]="isExpanded"
+            (click)="toggle()">
+            {{ title }}
+            <span class="glyphicon"
+                [ngClass]="{
+                    'glyphicon-chevron-up': isExpanded,
+                    'glyphicon-chevron-down': !isExpanded
+                }"
+            ></span>
+        </div>
+        <div *ngIf="isExpanded" class="zippy-body">
+            <ng-content></ng-content>
+        </div>
+    </div>
+
+
+
+    // Styles from Mosh 
+    .zippy {
+        border: 1px solid #ccc;
+        border-radius: 2px;
+    }
+
+    .zippy-heading {
+        font-weight: bold;
+        padding: 20px;
+        cursor: pointer;
+    }
+
+    .zippy-body {
+        padding: 20px;
+    }
+
+    .expanded {
+        background: #f0f0f0;
+    }
+
+    .glyphicon {
+        float: right;
+    }
+
+

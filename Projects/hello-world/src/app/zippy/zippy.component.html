@@ -1,0 +1,9 @@
+<div class="collapsable-container">
+  <span>{{ title }}</span>
+  <button class="toggle-button" (click)="onClick()">
+    {{ isDisplayingContent ? "Hide" : "Display" }}
+  </button>
+</div>
+<div *ngIf="isDisplayingContent == true">
+  <ng-content class="inner-content" select=".content"></ng-content>
+</div>

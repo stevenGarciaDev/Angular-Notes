@@ -1,0 +1,25 @@
+<form #f ngForm="f" class="form-group" (change)="log(f)">
+    <div class="form-control">
+        <label for="courseName">Course Name</label>
+        <input ngModel name="courseName" required minlength="5" type="text" id="courseName" />
+    </div>
+    <div>
+        <label>Category</label>
+        <select required>
+            <option *ngFor="let category of categories" name="category" [value]="category.id">
+                {{ category.name }}
+            </option>
+        </select>
+    </div>
+    <div>
+        <label for="guarantee">
+            <input required ngModel name="guarantee" id="guarantee" type="checkbox" />
+            30-day money-back guarantee
+        </label>
+
+    </div>
+    <div>
+        {{ f.value | json }}
+    </div>
+    <button class="btn btn-primary" [disabled]="f.valid">Create</button>
+</form>

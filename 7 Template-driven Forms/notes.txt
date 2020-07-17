@@ -1,0 +1,596 @@
+Introduction 
+
+Building a Basic Bootstrap Form 
+
+Types of Forms 
+
+ngModel 
+
+Adding Validation 
+
+Specific Validation Errors 
+
+Styling Invalid Input Fields 
+
+Cleaner Templates 
+
+ngForm 
+
+ngModelGroup
+
+Control classes and directives 
+
+disabling the submit button 
+
+working with check boxes 
+
+working with drop down lists 
+
+working with radio buttons 
+
+exercise - create course form 
+
+solution - course form 
+
+/* -----------------------
+
+Introduction 
+
+Building a Basic Bootstrap Form 
+
+    $ ng g c contact-form 
+
+    contact-form.component.html 
+
+    <form>
+        <div class="form-group">
+            // label+input[type='text'].form-control 
+            <label for="firstName">First Name</label>
+            <input id="firstName" type="text" class="form-control" />
+        </div>
+        // div.form-group>label[for='comment']+textarea[id='comment'].form-control 
+        <div class="form-group">
+            <label for="comment">Comment</label>
+            <textarea id="comment" cols="30" rows="10" class="form-control" />
+        </div>
+        <button class="btn btn-primary">Submit</button>
+    </form>
+
+    ---
+
+    contact-form.component.ts 
+
+    export class ContactFormComponent {
+
+    }
+
+    ----
+
+    app.component.html 
+
+
+    <contact-form></contact-form>
+
+Types of Forms 
+
+    In Angular we have a class called 
+
+    FormControl  
+
+    For each input field, we need to create an instance of the control class 
+    and with this control class 
+
+    we can check the value, whether it has been touched or untouched 
+
+    dirty (value has changed),
+    pristine (value has not changed)
+
+    valid ,
+    errors, 
+
+
+    For each input field, we need a control object.
+
+
+    -
+
+    We also have another class called FormGroup 
+
+        They represent a group of controls in a form. 
+
+        Each form is essentially a control group because it 
+        contains at least one control. 
+
+        In a complex application, could have a form with multiple control groups. 
+
+    So all the properties of the control class are also 
+    in FormGroup
+
+    Can ask if it's valid or not 
+        based on if all the inputs in that group 
+
+
+    Easier than iterating through each.
+
+    --
+
+    So need to create form group objects ,
+    a form control object for each input field 
+    as to keep track of the input field and the 
+    form as a whole 
+
+
+    There are two ways to create these control objects. 
+
+    // Creating controls 
+
+        - Directives 
+
+            // apply directives in our template and Angular will create the control objects for us 
+            / implicitly under the hood 
+            => Template-Driven forms 
+
+        - Code 
+            // Explicitly creating these control objects.
+            // So in our components, should write code to create new instances 
+            // of the controlled groups and controlled objects.
+            => Reactive Forms 
+            // used to be called model driven forms 
+
+
+    What is the difference?
+
+        When create these control objects explicitly with Reactive forms 
+
+        * more control over validation logic 
+        * good for complex forms 
+        * unit testable!!
+
+        with template driven 
+
+            * good for simple forms 
+            * simple validation 
+            * Easier to create 
+            * less code 
+            * less overall control 
+
+
+ngModel 
+
+    We apply a directive and associate with that input field under the hood. 
+
+    We already know the directive and it's ngModel. 
+    Before we used it like 
+
+        [(ngModel)]="firstName"
+        // binding to a property in our component 
+
+    Here when we apply the ngModel directive on an input field,
+    by itself,
+    Anglar will create a control object and associate it with this object 
+    under the hood. 
+
+    It needs a way to distinguish the input fields, by utilizing the name attribute. 
+
+     <form>
+        <div class="form-group">
+            // label+input[type='text'].form-control 
+            <label for="firstName">First Name</label>
+            <input ngModel name="firstName" #firstName="ngModel" (change)="log(firstName)" id="firstName" type="text" class="form-control" />
+        </div>
+        // div.form-group>label[for='comment']+textarea[id='comment'].form-control 
+        <div class="form-group">
+            <label for="comment">Comment</label>
+            <textarea ngModel name="comment" id="comment" cols="30" rows="10" class="form-control" />
+        </div>
+        <button class="btn btn-primary">Submit</button>
+    </form>
+
+    --
+
+    So 
+
+    ngModel name="firstName"
+
+    For example are all you need to set to use the template approach. 
+
+    Under the hood. 
+
+    So can make a template variable for the input and the change method (event binding)
+
+    console.log(...)
+
+    Then see in the developer console. 
+
+    NgModel 
+        expand the object to see the properties 
+
+        conrol object // an instance of FormControl 
+        expand it 
+
+            to see the properties
+
+        Many of the properties come in pairs 
+
+    Also property of value returns the value of the input field 
+
+    We use the FormControl class to track state changes and 
+    the validity of input fields. 
+
+    When we apply the ngModel directive along with the name attribute of the input field.
+
+    Angular automatically creates an instance of the FormControl class 
+    and associates it with the input field. 
+
+    log(x) {
+        console.log(x);
+    }
+
+    --
+
+    Note the property of value,
+
+
+Adding Validation 
+
+    NgModel delegates to the underlying form control object.
+
+    valid is a computed property so the ngModel delegates to the underlying Form Control class 
+    to determine if the input is valid 
+
+    <form>
+        <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input required ngModel #firstName="ngModel" name="firstName" id="firstName" type="text" class="form-control" />
+
+            <!-- *ngIf references the template variable associated with ngModel in the above input field -->
+            <div class="alert alert-danger" *ngIf="firstName.touched && !firstName.valid">First Name is required</div>
+
+        </div> 
+        <div class="form-group">
+            <label for="comment">Comment</label>
+            <textarea name="comment" id="comment" cols="30" rows="10" class="form-control" />
+        </div>
+        <button class="btn btn-primary">Submit</button>
+    </form>
+
+Specific Validation Errors 
+
+    In Angular, we have a few built in validators which are based on HTML5 
+
+        // pattern is for regular expression, 
+        // can't show all the errors with one div,
+        // 
+        <input required minlength="3" maxlength="10" pattern="..." ngModel 
+
+     <form>
+        <div class="form-group">
+
+            <label for="firstName">First Name</label>
+            <input required ngModel #firstName="ngModel" name="firstName" id="firstName" type="text" class="form-control" />
+            <div class="alert alert-danger" *ngIf="firstName.touched && !firstName.valid">First Name is required</div>
+
+        </div> 
+        <div class="form-group">
+            <label for="comment">Comment</label>
+            <textarea name="comment" id="comment" cols="30" rows="10" class="form-control" />
+        </div>
+        <button class="btn btn-primary">Submit</button>
+    </form>
+
+    Instead you want a separate div for each validation error. 
+    So we have key value pairs, with the key being the errors. 
+
+    <div class="alert alert-danger" *ngIf="firstName.touched && !firstName.valid">
+        <div *ngIf="firstName.errors.required">First name is required</div>
+        <div *ngIf="firstName.errors.minlength">First name should be minimum 3 characters</div>
+        <div *ngIf="firstName.errors.pattern">First name doesn't match the pattern</div>
+    </div>
+
+    Just use the standard HTML5 attributes and 
+    have a separate div for each error message. 
+    
+
+    The content of the errors object. 
+
+    in the console 
+
+    NgModel 
+        errors object 
+        (expand)
+
+    Can take advantage of these properties and render a dynamic error to the user. 
+
+    Instead of hardcoding the value, you can render it dynamically. 
+
+        <div *ngIf="firstName.errors.minlength">First name should be minimum {{ firstName.errors.minlength.requiredLength }} characters</div>
+
+
+Styling Invalid Input Fields 
+
+    Should highlight the invalid input fields as it improves the usability of our forms. 
+
+    How to apply a red border to the input field?
+
+        In styles.css 
+        // global styles 
+
+    The classes are added by Angular dynamically
+    
+    We can use these classes to apply styles to invalid input fields.
+
+    .form-control .ng-touched .ng-invalid {
+        border: 2px solid red;
+    }
+
+Cleaner Templates 
+
+    As you build forms with Angular, you will find that your forms become 
+    more complex. 
+
+    As a best practice, your code should be formatted in a way that another 
+    developer does not have to scroll to the right or to the left. 
+
+    There's a cleaner way.
+
+        Have one attribute for an element, on its own line.
+        Making it easier to read. 
+
+ngForm 
+
+    So when we apply the ngModel directive on an input field, Angular creates a FormControl object under the hood. 
+    And associates that instance with the input field. 
+
+    Also have a FormGroup.
+
+        FormControl -> one input field 
+
+        FormGroup -> a group of FormControls 
+
+    Each form is a FormGroup.
+
+    Angular by default applies a directive, ngForm to 
+
+    <form>
+
+    Automatically 
+
+    Look at documentation for NgForm 
+
+    We can create a template variable to get a reference to that NgForm directive.
+
+        <form #f="ngForm">
+
+    similar to how our input field we did,
+        #firstName="ngModel"
+
+    Has an output property, ngSubmit 
+
+    Remember we use output properties to raise custom events. 
+
+        <form #f="ngForm" (ngSubmit)="submit(f)">
+
+    Now within the component 
+
+    export class ContactFormComponent {
+        submit(f) {
+            console.log(f);
+            // so we can access all the properties in f,
+            // such as f.valid, etc. 
+            // in case we want to do something programmatically
+            // f.value 
+            // so .value has the names of the input field 
+            // a JSON representation of our form 
+        }
+    }
+
+    // f.value will return a JSON object that you can send to the API on the server 
+    // for persistance
+
+ngModelGroup
+
+    Sometimes when working with complex forms.
+
+    You will have multiple groups. 
+
+    Just like ngModel directive 
+
+    Also have ngModelGroup directive 
+
+    <form #f="ngForm" (ngSubmit)="submit(f)">
+        <div ngModelGroup="contact" #contact="ngModelGroup">
+            <div *ngIf="!contact.valid">......</div>
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input 
+                    ......
+        </div>
+
+    So now the .value object will have a complex, nested object structure 
+    // a hiearchy
+
+    Can also get a reference to the directive with a template variable 
+
+    Can now validate entire group as a whole,
+    display all the validation errors of that group for example 
+
+Control classes and directives 
+
+    In Angular we have two classes to keep track of the state of input fields and their validity.
+
+    FormControl => 1 input field 
+
+    FormGroup => a group of input fields 
+
+    When apply ngModel directive on an input field,
+    Angular automatically creates a FormControl object and associates that with the input field. 
+
+    FormGroup is used to represent an entire form 
+    and optionally groups within a form. 
+
+    ngForm is automatically applied to all form elements. 
+
+    Angular applies the ngForm directive to your forms which will internally create a FormGroup object 
+    and associate it with your form.
+
+    Can track the state changes of the form and its validity.
+
+    If you have a complex form with multiple subgroups, can optionally apply 
+    the ngModelGroup directive on a subgroup.
+
+    This directive is similar to ngForm will also create a FormGroup object for that group.
+
+    The difference between ngForm and ngModelGroup?
+
+        Differenence is that ngForm exposes an output property for ngSubmit 
+        to handle the submit event of forms. 
+
+        ngModelGroup doesn't have that submit property.
+
+disabling the submit button 
+
+    Disable submit button and enable only if the form is in a valid state. 
+
+    Earlier declared template variable 
+
+    <form #f="ngForm" (ngSubmit)="submit(f)">
+
+    
+    So use property binding and bind the disabled property 
+
+    <button class="btn btn-primary" [disabled]="f.valid">Submit</button>
+
+working with check boxes 
+
+    To add a checkbox. 
+
+    <div class="checkbox">
+        <label>
+        <input type="checkbox" ngModel name="isSubscribed" /> Subscribe to mailing list
+        </label>
+    </div>
+    <p>
+        <!-- as a diagnostic tool to format as json -->
+        {{ f.value | json }}
+    </p>
+
+working with drop down lists 
+
+    export class ContactFormComponent {
+        contactMethods = [
+            { id: 1, name: 'Email' },
+            { id: 2, name: Phone' },
+        ];
+    }
+
+
+    <div class="form-group">
+        <label for="contactMethod"></label>
+        <select 
+            ngModel 
+            name="contactMethod"
+            class="form-control" 
+            id="contactMethod">
+            <option value=""></option>
+            <option *ngFor="let method of contactMethods" [value]="method.id">
+                {{ method.name }}
+            </option>
+        </select>
+
+
+    Note that the value attribute of option can only be a string. 
+    Can't have an actual object, 
+    
+
+    Instead can bind with ngValue which is an attribute directive that exposes the ngValue property.
+    Can bind it to a complex object. 
+
+    <option *ngFor="let method of contactMethods" [ngValue]="method">
+
+    // wouldn't do this normally though 
+
+
+    Sometimes want the user to select multiple options,
+
+    <select multiple ngModel .....>
+
+        // so just add the multiple attribute 
+
+working with radio buttons 
+
+    Radio buttons allow only one selection. 
+
+    <div class="radio">
+        <label>
+            <input ngModel type="radio" name="contactMethod" value="1"/>
+            Email
+        </label>
+         <label>
+            <input ngModel type="radio" name="contactMethod" value="2"/>
+            Phone
+        </label>
+    </div>
+
+    To render it dynamically 
+
+    <div *ngFor="let method of contactMethods" class="radio">
+        <label>
+            <input 
+                ngModel
+                type="radio" 
+                name="contactMethod" 
+                value="method.id"/>
+            {{ method.name }}
+        </label>
+    </div>
+
+exercise - create course form 
+
+    Build a form 
+
+    Course Name 
+
+    Category 
+        // select 
+
+    Checkbox 
+        30-day money-back guarantee
+
+    Name should be minimum 5 characters 
+
+    category is required 
+
+        Development 
+        Art 
+        Languages 
+
+    Create button 
+
+solution - course form 
+
+    <new-course-form></new-course-form>
+
+-
+
+    <form>
+        <div class="form-group">
+            <label for="courseName">Course Name</label>
+            <input type="text" name="courseName" class="form-control" id="courseName" />
+        </div>
+         <div class="form-group">
+            <label for="category">Category</label>
+            <select name="" id="category" class="form-control">
+
+            </select>
+        </div>
+    </form>
+
+    -
+
+    export class NewCourseFormComponent {
+        categories = [
+            { id: 1, name: 'Development'},
+            { id: 2, name: 'Art'},
+            { id: 3, name: 'Languages'},
+        ];
+    }

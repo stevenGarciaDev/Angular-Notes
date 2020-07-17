@@ -1,0 +1,6 @@
+Notes from Drake and Danny 
+
+--
+
+Covering topics of Angular/NgRx/Jasmine     
+
